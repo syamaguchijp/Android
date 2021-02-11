@@ -14,7 +14,7 @@ class RoundRobin() {
             
             var answerList: MutableList<List<Int>> = mutableListOf()
             
-            var initialRow: MutableList<Int> = mutableListOf()
+            var initialRow = mutableListOf<Int>()
             for (i in 0..totalIndex-1) {
                 initialRow.add(0)
             }
@@ -32,7 +32,7 @@ class RoundRobin() {
         fun makeArray(currentRowNum: Int, lastRow: List<Int>): MutableList<Int>? {
         
             val totalIndexs = lastRow.count()
-            var newRow: MutableList<Int> =  mutableListOf()
+            var newRow = mutableListOf<Int>()
             for (i in 0..totalIndexs-1) {
                 newRow.add(0)
             }
