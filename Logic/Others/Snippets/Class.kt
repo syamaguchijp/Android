@@ -4,14 +4,17 @@ open class User constructor(var name: String, var age: Int = 100) { // プライ
     // プライマリコンストラクタにおいてvarでnameやageを定義しているので以下メンバ宣言は要らない
     //var name: String
     //var age: Int
+    var isMale: Boolean = false
 
     // セカンダリコンストラクタ 1
-    constructor(name: String): this(name, 20) // プライマリコンストラクタを呼び出さなければならない
+    constructor(name: String, isMale: Boolean): this(name, 20) {// <-プライマリコンストラクタを呼び出さなければならない
+        this.isMale = isMale
+    }
 
     // セカンダリコンストラクタ 2
-    constructor(): this("Sato") // セカンダリコンストラクタ 1を呼び出す
+    constructor(): this("Sato", true) // セカンダリコンストラクタ 1を呼び出す
 
-    // 初期化ブロック
+    // 初期化ブロック（プライマリコンストラクタからコールされる）
     init {
         // プライマリコンストラクタにおいてvarでnameやageを定義しているので以下記述は要らない
         //this.name = name
@@ -20,7 +23,7 @@ open class User constructor(var name: String, var age: Int = 100) { // プライ
 
     // open修飾子でオーバーライドを許容
     open fun dump() {
-        println("name=${name} age=${age} region=${region}")
+        println("name=${name} age=${age} isMale=${isMale} region=${region}")
     }
 
     // プロパティのアクセッサ（セッター）
@@ -31,7 +34,6 @@ open class User constructor(var name: String, var age: Int = 100) { // プライ
             }
             field = value
         }
-
 }
 
 // Userクラスを継承
@@ -48,7 +50,7 @@ fun main() {
     val user = User("Takeda", 21)
     user.dump()
 
-    val user2 = User("Yamada")
+    val user2 = User("Yamada", true)
     user2.dump()
 
     val user3 = User()
