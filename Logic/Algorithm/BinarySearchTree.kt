@@ -41,6 +41,76 @@ class BinaryTree<K, V>(var root: Node<K, V>?, val comparator: Comparator<in K>?)
         }
     }
 
+    // ノードを削除する
+    fun remove(key: K): Boolean {
+
+        var pointerNode = root
+        var parentNode: Node<K, V>? = null
+        var isLeftChild = true // pointerNodeはparentNodeの左子ノードかどうか
+
+        // まず削除するキーを探索する
+        while (true) {
+            pointerNode = pointerNode ?: return false // これ以上進めない時はキーは存在しない
+
+            val result = compare(key, pointerNode.key)
+            if (result == 0) {
+                break // 探索に成功したためbreakする
+            } else {
+                parentNode = pointerNode
+                if (result < 0) {
+                    isLeftChild = true
+                    pointerNode = pointerNode.left
+                } else {
+                    isLeftChild = false
+                    pointerNode = pointerNode.right
+                }
+            }
+        }
+
+        pointerNode = pointerNode ?: return false
+
+        // 左の子ノードをもたないノードの削除
+        if (pointerNode.left == null) {  
+            if (pointerNode == root) {
+                root = pointerNode.right
+            } else if (isLeftChild) {
+                parentNode?.left = pointerNode.right
+            } else {
+                parentNode?.right = pointerNode.right
+            }
+
+        // 左に子ノードがあるが右に子ノードがないノードの削除
+        } else if (pointerNode.right == null) {
+            if (pointerNode == root) {
+                root = pointerNode.left
+            } else if (isLeftChild) {
+                parentNode?.left = pointerNode.left
+            } else {
+                parentNode?.right = pointerNode.left
+            }
+
+        // 左右の子ノードを持つノードの削除
+        } else {
+            // 左部分木の最大値を持ってきて据え置く
+            parentNode = pointerNode
+            var leftNode = pointerNode.left!!
+            isLeftChild = true
+            while (leftNode.right != null) {
+                parentNode = leftNode
+                leftNode = leftNode.right!!
+                isLeftChild = false
+            }
+            pointerNode.key = leftNode.key
+            pointerNode.value = leftNode.value
+            if (isLeftChild) {
+                parentNode?.left = leftNode.left
+            } else {
+                parentNode?.right = leftNode.right
+            }
+        }
+        return true
+    }
+
     fun search(key: K): V? {
 
         var rootNode = root
@@ -98,6 +168,7 @@ fun main() {
     binaryTree.add(7, "EEE")
     binaryTree.add(8, "FFF")
     binaryTree.add(12, "GGG")
+    binaryTree.remove(7)
     binaryTree.dumpAll()
     println("${binaryTree.search(8)}")
 
