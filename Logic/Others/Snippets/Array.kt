@@ -11,11 +11,27 @@ fun main() {
     // プリミティブ型配列（IntArray, LongArray, ByteArray .etc） 
     intArrayOf(0, 1, 2)
     
-    // 空の配列（後で値を入れる場合）[null,null,null]
+    // 空で長さ0の配列を作って中身を足していく
+    var empAry = emptyArray<Int>()
+    empAry += 1
+    empAry += 2
+    empAry += 3
+    var empStrAry = emptyArray<String>()
+    empStrAry += "A"
+    empStrAry += "B"
+    empStrAry += "C"
+    println(empStrAry[2])
+
+    // [null,null,null]（後で値を入れる場合）
     val array: Array<Int?> = arrayOfNulls(3)
     array[0] = 10
     array[1] = 11
-    array[2] = 12
+    println(array[2])
+
+    val nullArray: Array<String?> = arrayOfNulls(3)
+    nullArray[0] = "AA"
+    nullArray[1] = "BB"
+    println(nullArray[1])
 
     // 配列の要素数
     println(array.size)
@@ -39,6 +55,12 @@ fun main() {
     if ("Hakata" in strAry) {
         println("contains Hakata")
     }
+
+    // 多次元配列
+    val multiAry: Array<Array<Int?>> = Array(5, {arrayOfNulls<Int?>(5)}) // int[][] array = new int[5][5]
+    multiAry[0][0] = 7
+    multiAry[0][1] = 9
+    println(multiAry[0][0])
 
     //endregion
 
