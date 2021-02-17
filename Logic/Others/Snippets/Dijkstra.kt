@@ -10,69 +10,68 @@ class Dijkstra() {
      */
      fun execute(mapArray: Array<Array<Int?>>, nodeNum: Int, startNode: Int, endNode: Int) {
 
-         // 初期化
-        var distanceArray: Array<Int> = emptyArray<Int>() // 各ノードまでの最短距離
-        var isFixedArray: Array<Boolean> = emptyArray<Boolean>() // 最短距離が確定したかどうかを保持する配列
-        for (i in 0..nodeNum-1) {
-            distanceArray += Int.MAX_VALUE
-            isFixedArray += false
-        }
-        distanceArray[startNode] = 0 // 出発地点までの距離は0
+        // 初期化
+        var resultArray = Array<Result>(nodeNum){Result()}
+        resultArray[startNode].distance = 0 // 出発地点までの距離は0
 
         while (true) {
             // 未確定の中で最も近いノードを求める
-            val nearestIndex = findNearestNode(distanceArray, isFixedArray)
+            val nearestIndex = findNearestNode(resultArray)
             if (nearestIndex < 0) {
                 break // 全ノードが確定した場合
             }
-            if (distanceArray[nearestIndex] == Int.MAX_VALUE) {
+            if (resultArray[nearestIndex].distance == Int.MAX_VALUE) {
                 break // 非連結グラフのためbreak
             }
-            isFixedArray[nearestIndex] = true // 当該ノードまでの最短距離が確定となる
+            resultArray[nearestIndex].isFixed = true // 当該ノードまでの最短距離が確定となる
             // 「mapArray[fromNode][toNode] = 距離」であるため、配列を走査して隣のNodeとの距離を調べる
             for (i in 0..nodeNum-1) {
                 mapArray[nearestIndex][i]?.let{
-                    if (!isFixedArray[i]) { // 距離がまだ未確定であればその距離を求めて記録する
-                        val minDistance = distanceArray[nearestIndex] + mapArray[nearestIndex][i]!!
+                    if (!resultArray[i].isFixed) { // 距離がまだ未確定であればその距離を求めて記録する
+                        val minDistance = resultArray[nearestIndex].distance + mapArray[nearestIndex][i]!!
                         // 今までの距離よりも小さいものであれば記録
-                        if (minDistance < distanceArray[i]) {
-                            distanceArray[i] = minDistance
+                        if (minDistance < resultArray[i].distance) {
+                            resultArray[i].distance = minDistance
                         }
                     }
                 }
             }
         }
         // 結果を出力する
-        if (distanceArray[endNode] == Integer.MAX_VALUE) {
+        if (resultArray[endNode].distance == Integer.MAX_VALUE) {
             println("FAIL")
         } else {
-            println("Distance is ${distanceArray[endNode]}");
+            println("Distance is ${resultArray[endNode].distance}");
         }
     }
 
     // まだ距離が確定していないNodeの中で、最も近いものを探す
-    private fun findNearestNode(distanceArray: Array<Int>, isFixedArray: Array<Boolean>): Int {
-        
+    private fun findNearestNode(resultArray: Array<Result>): Int {
+
         var ans = 0
-        for (i in 0..isFixedArray.size-1) {
-            if (!isFixedArray[ans]) {
+        for (i in 0..resultArray.size-1) {
+            if (!resultArray[ans].isFixed) {
                 // 未確定のNode
                 break
             }
             ans++
         }
-        if (ans == isFixedArray.size) {
+        if (ans == resultArray.size) {
             // 未確定のNodeが存在しないため終了
             return -1
         }
         // 距離が短いものを探す
-        for (i in ans+1..isFixedArray.size-1) {
-            if (!isFixedArray[i] && distanceArray[i] < distanceArray[ans]) {
+        for (i in ans+1..resultArray.size-1) {
+            if (!resultArray[i].isFixed && resultArray[i].distance < resultArray[ans].distance) {
                 ans = i
             }
         }
         return ans
     }
+}
+
+data class Result(var distance: Int = Int.MAX_VALUE, var isFixed: Boolean = false) {
+    // isFixed = 最短距離が確定したかどうか
 }
 
 fun main() {

@@ -2,6 +2,8 @@ fun main() {
     
     //region 配列
 
+    // Array<型名>(要素の数, {初期化処理})
+
     // [0, 1, 2]
     arrayOf(0, 1, 2)
 
