@@ -3,17 +3,18 @@ fun main() {
     //region 配列
 
     // Array<型名>(要素の数, {初期化処理})
+    val personArray = Array<Person>(100, {Person()})
 
+    // [0, 1, 2, 3, 4]
+    val intArray = Array(5){it} // Arrayコンストラクタ 要素数とラムダ式
+    
     // [0, 1, 2]
     arrayOf(0, 1, 2)
 
-    // [0, 1, 2, 3, 4]
-    Array(5){it} // Arrayコンストラクタ 要素数とラムダ式
-
-    // プリミティブ型配列（IntArray, LongArray, ByteArray .etc） 
+    // プリミティブ型配列（IntArray, LongArray, ByteArray .etc） // Kotlinではあまり使わない
     intArrayOf(0, 1, 2)
-    
-    // 空で長さ0の配列を作って中身を足していく
+
+    // 空で長さ0の配列を作って、後で要素を足していく
     var empAry = emptyArray<Int>()
     empAry += 1
     empAry += 2
@@ -24,13 +25,13 @@ fun main() {
     empStrAry += "C"
     println(empStrAry[2])
 
-    // [null,null,null]（後で値を入れる場合）
-    val array: Array<Int?> = arrayOfNulls(3)
+    // 要素がnullの配列を作り、後で値を入れていく。
+    val array: Array<Int?> = arrayOfNulls(3) // [null,null,null]
     array[0] = 10
     array[1] = 11
     println(array[2])
 
-    val nullArray: Array<String?> = arrayOfNulls(3)
+    val nullArray: Array<String?> = arrayOfNulls(3) // 要素数
     nullArray[0] = "AA"
     nullArray[1] = "BB"
     println(nullArray[1])
@@ -69,9 +70,10 @@ fun main() {
     //region リスト（ミュータブル）
     
     var mlist = mutableListOf<String>() // 空のリストの生成
-
+    // println(mlist[0]) // <- IndexOutOfBoundsExceptionが発生することに注意
+    
     mlist = mutableListOf("Tokyo", "Osaka")
-
+    
     mlist.add("Nagoya") // 要素の追加
     mlist.addAll(listOf("Sendai", "Sapporo"))
 
@@ -176,4 +178,7 @@ fun main() {
 
     //endregion
 
+}
+
+data class Person(var name: String = "", var age: Int = 0) {
 }
