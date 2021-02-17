@@ -34,6 +34,14 @@ open class User constructor(var name: String, var age: Int = 100) { // プライ
             }
             field = value
         }
+
+    // Static
+    companion object {
+        val hoge = "HOGE"
+        fun sampleClassMethod() {
+            println("sampleClassMethod")
+        }
+    }
 }
 
 // Userクラスを継承
@@ -60,4 +68,7 @@ fun main() {
 
     val specialUser = SpecialUser("Takagi", 19)
     specialUser.dump()
+
+    User.sampleClassMethod()
+    println(User.hoge)
 }
