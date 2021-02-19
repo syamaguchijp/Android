@@ -44,6 +44,13 @@ fun main() {
     for (i in 0..strAry.size-1) {
         println(strAry[i])
     }
+    for (i in 0 until strAry.size) {
+        println(strAry[i])
+    }
+    // 配列の末尾から先頭へのデクリメント
+    for (i in strAry.size-1 downTo 0) {
+        println(strAry[i])
+    }
     for (index in strAry.indices) {
         println(strAry[index])
     }
