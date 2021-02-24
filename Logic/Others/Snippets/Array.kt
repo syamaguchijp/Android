@@ -66,6 +66,16 @@ fun main() {
         println("contains Hakata")
     }
 
+    // DeepCopy
+    val copyAry = strAry.clone()
+    copyAry[0] = "Sapporo"
+    println("strAry[0]=${strAry[0]}")
+
+    // ShallowCopy
+    val copyAry2 = strAry
+    copyAry2[0] = "Naha"
+    println("strAry[0]=${strAry[0]}")
+
     // 多次元配列
     val multiAry: Array<Array<Int?>> = Array(5, {arrayOfNulls<Int?>(5)}) // int[][] array = new int[5][5]
     multiAry[0][0] = 7
@@ -108,6 +118,16 @@ fun main() {
     if ("Sapporo" in mlist) {
         println("contains Sapporo")
     }
+
+    // DeepCopy
+    val copyList = mlist.toMutableList()
+    copyList[0] = "London"
+    println("mlist[0]=${mlist[0]}")
+
+    // ShallowCopy
+    val copyList2 = mlist
+    copyList2[0] = "New York"
+    println("mlist[0]=${mlist[0]}")
 
     // 要素の削除
     mlist.remove("Nagoya")
