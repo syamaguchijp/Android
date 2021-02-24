@@ -22,7 +22,7 @@ class LinearSearch() {
         /* 
         // 番兵法を使わない場合
         while (true) {
-            if (index == list.count()) {
+            if (index == list.count()) { // このif文のコスト
                 // 探索失敗のため-1を返却
                 return -1
             } 
