@@ -1,12 +1,15 @@
+import java.lang.ref.WeakReference;
+
 // デリゲートパターン
 interface SomeCallback {
     fun didCallBack(number: Int)
 }
 
 class Callee {
-    var callback: SomeCallback? = null
+    var callbackRef: WeakReference<SomeCallback>? = null // 弱参照
 
     fun execute(){
+        val callback = callbackRef?.get()
         callback?.didCallBack(1)
     }
 }
@@ -16,7 +19,7 @@ class Caller: SomeCallback {
     var callee = Callee()
 
     init {
-        callee.callback = this
+        callee.callbackRef =  WeakReference<SomeCallback>(this)
     }
 
     fun execute() {
@@ -32,15 +35,12 @@ fun main() {
     val caller = Caller()
     caller.execute()
 
-
-
     // 直接CalleeにSomeCallbackの無名クラスを渡してこんなコールバックもできる
     val callee = Callee()
-    callee.callback = object: SomeCallback {
+    callee.callbackRef = WeakReference<SomeCallback>(object: SomeCallback {
         override fun didCallBack(number: Int) {
             println("didCallBack!!!! $number")
         }
-    }
+    })
     callee.execute()
-
 }
