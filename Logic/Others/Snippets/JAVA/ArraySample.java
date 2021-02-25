@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Array {
+public class ArraySample {
 
     public static void main(String args[]) {
 
