@@ -1,6 +1,7 @@
 import java.lang.ref.WeakReference;
 
-// デリゲートパターン
+// Interfaceを利用したデリゲートパターン
+
 interface SomeCallback {
     fun didCallBack(number: Int)
 }
