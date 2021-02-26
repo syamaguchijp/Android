@@ -1,6 +1,8 @@
+// Interfaceを利用したデリゲートパターン
+
 import java.lang.ref.WeakReference;
 
-public class InterfaceSample {
+public class Interface_delegate {
 
     public static void main(String args[]) {
          Caller caller = new Caller();
@@ -8,7 +10,6 @@ public class InterfaceSample {
     }
 }
 
-// デリゲートパターン
 interface SomeCallback {
     public void didCallBack(int number);
 }
