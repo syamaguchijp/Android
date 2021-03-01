@@ -25,6 +25,10 @@ class Sample() {
             hoge = hoge.toUpperCase()
             println(hoge)
         }
+
+        hoge?.let {
+            println("hoge is not null.")
+        }
     }
 
     fun methodB(fuga: String?) {
