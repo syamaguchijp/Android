@@ -26,8 +26,12 @@ open class User constructor(var name: String, var age: Int = 100) { // プライ
         println("name=${name} age=${age} isMale=${isMale} region=${region}")
     }
 
-    // プロパティのアクセッサ（セッター）
-    var region = "Tokyo"
+    // プロパティのアクセッサ（ゲッターとセッター）
+    var region: String = "Tokyo" // 初期値
+        get() {
+            return "...${field}"
+        }
+        //get() = "...${field}" <- この書き方でも可
         set(value) {
             if (value.length < 3) {
                 throw IllegalArgumentException("文字数は3文字以上で入力してください")
@@ -43,7 +47,6 @@ open class User constructor(var name: String, var age: Int = 100) { // プライ
         }
     }
 }
-
 // Userクラスを継承
 class SpecialUser(name: String, age: Int): User(name, age) {
 
@@ -52,6 +55,21 @@ class SpecialUser(name: String, age: Int): User(name, age) {
         println("名前=${name} 年齢=${age} 地域=${region}")
     }
 }
+
+// ---------------------
+// 抽象クラスと具象クラス
+abstract class AbstructCar(val name: String){
+    //抽象プロパティと抽象メソッド
+    abstract var power: Int
+    abstract fun run()
+}
+class ConcreteCar(name: String): AbstructCar(name){
+    override var power = 100
+    override fun run() {
+        println("run ${power}")
+    }
+}
+// ---------------------
 
 
 fun main() {
@@ -62,8 +80,8 @@ fun main() {
     user2.dump()
 
     val user3 = User()
-    //user3.region = "aa"
     user3.region = "Osaka"
+    println("user3.getRegon=${user3.region}")
     user3.dump()
 
     val specialUser = SpecialUser("Takagi", 19)
@@ -71,4 +89,7 @@ fun main() {
 
     User.sampleClassMethod()
     println(User.hoge)
+
+    val car = ConcreteCar("nissan")
+    car.run()
 }
