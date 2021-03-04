@@ -26,8 +26,12 @@ class Sample() {
             println(hoge)
         }
 
+        // アンラップ
         hoge?.let {
-            println("hoge is not null.")
+            println("hoge is not null. ${it}") // hoge?でアンラップした値はitで受ける
+        }
+        hoge?.let { a ->
+            println("hoge is not null. ${a}") // hoge?でアンラップした値はパラメータ指定できる
         }
     }
 
