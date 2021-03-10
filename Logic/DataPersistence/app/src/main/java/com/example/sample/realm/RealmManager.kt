@@ -3,6 +3,7 @@ package com.example.sample.realm
 import android.content.Context
 import com.example.sample.log.Logging
 import io.realm.Realm
+import io.realm.RealmConfiguration
 import io.realm.kotlin.where
 import java.util.*
 
@@ -18,12 +19,26 @@ class RealmManager {
 
     private var isInitialized = false
 
+    private fun initialize(context: Context) {
+
+        isInitialized = true
+
+        Realm.init(context)
+
+        // スキーマ変更時のマイグレーション
+        val realmConfig = RealmConfiguration.Builder()
+            .schemaVersion(1L) // 新しいスキーマのバージョン
+            .migration(Migration())
+            .build()
+        Realm.setDefaultConfiguration(realmConfig)
+    }
+
     fun insert(context: Context) {
 
-        if (!isInitialized) {Realm.init(context)}
+        if (!isInitialized) {initialize(context)}
 
         var realm = Realm.getDefaultInstance()
-        val personData = Person(Date().time.toString(),31)
+        val personData = Person(Date().time.toString(),31, "nick")
         realm.beginTransaction()
         realm.insert(personData)
         realm.commitTransaction()
@@ -32,7 +47,7 @@ class RealmManager {
 
     fun selectAll(context: Context) {
 
-        if (!isInitialized) {Realm.init(context)}
+        if (!isInitialized) {initialize(context)}
 
         var realm = Realm.getDefaultInstance()
         val persons = realm.where<Person>().findAll()
@@ -44,7 +59,7 @@ class RealmManager {
 
     fun deleteAll(context: Context) {
 
-        if (!isInitialized) {Realm.init(context)}
+        if (!isInitialized) {initialize(context)}
 
         var realm = Realm.getDefaultInstance()
         realm.beginTransaction()

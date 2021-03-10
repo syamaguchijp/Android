@@ -5,5 +5,6 @@ import io.realm.annotations.PrimaryKey
 
 open class Person(
     var name: String = "",
-    var age: Int = 0
+    var age: Int = 0,
+    var nickname: String = ""
 ) : RealmObject()
