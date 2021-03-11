@@ -7,6 +7,7 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.webkit.WebView
+import androidx.appcompat.widget.Toolbar
 
 /*
 class GestureWebView @JvmOverloads constructor(
@@ -20,6 +21,8 @@ class GestureWebView: WebView {
     constructor(context: Context) : super(context, null) {}
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {}
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {}
+
+    //region Flick
 
     private val X_MIN_DISTANCE = 100
     private val X_MIN_VELOCITY = 200
@@ -74,4 +77,26 @@ class GestureWebView: WebView {
         })
     }
 
+    //endregion
+
+    //region Scroll
+
+    var toolbar: Toolbar? = null
+
+    override fun onScrollChanged(scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
+        super.onScrollChanged(scrollX, scrollY, oldScrollX, oldScrollY)
+        Log.i("onScrollChanged", "${scrollY} ${oldScrollY}")
+        if (scrollY > oldScrollY) {
+            toolbar?.let {
+                // 下を見ようとしているため、画面下部のツールバーを非表示にする
+                it.setVisibility(INVISIBLE)
+            }
+        } else if (scrollY < oldScrollY) {
+            toolbar?.let {
+                it.setVisibility(VISIBLE)
+            }
+        }
+    }
+
+    //endregion
 }

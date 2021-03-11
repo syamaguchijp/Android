@@ -5,13 +5,15 @@ import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
+import android.view.View.INVISIBLE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.webkit.CookieManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ProgressBar
+import androidx.appcompat.view.menu.ActionMenuItemView
 import androidx.appcompat.widget.Toolbar
 
 
@@ -30,16 +32,6 @@ class MyFragment : Fragment() {
 
         val webView = v.findViewById(R.id.webView1) as GestureWebView
         val progressBar = v.findViewById(R.id.progressBar1) as ProgressBar
-        webView.webViewClient = object: WebViewClient(){
-            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                super.onPageStarted(view, url, favicon)
-                progressBar.visibility = View.VISIBLE
-            }
-            override fun onPageFinished(view: WebView?, url: String?) {
-                super.onPageFinished(view, url)
-                progressBar.visibility = View.GONE
-            }
-        }
 
         webView.settings.javaScriptEnabled = true
 
@@ -63,6 +55,35 @@ class MyFragment : Fragment() {
                 webView.reload()
             }
             true
+        }
+
+        webView.toolbar = toolbar
+
+        val preButton = toolbar.findViewById(R.id.btn_prev) as ActionMenuItemView
+        val nextButton = toolbar.findViewById(R.id.btn_next) as ActionMenuItemView
+
+        webView.webViewClient = object: WebViewClient(){
+
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+                progressBar.visibility = View.VISIBLE
+            }
+
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                progressBar.visibility = View.GONE
+
+                if (webView.canGoBack()) {
+                    preButton.setVisibility(VISIBLE)
+                } else {
+                    preButton.setVisibility(INVISIBLE)
+                }
+                if (webView.canGoForward()) {
+                    nextButton.setVisibility(VISIBLE)
+                } else {
+                    nextButton.setVisibility(INVISIBLE)
+                }
+            }
         }
 
         return v
