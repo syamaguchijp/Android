@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <item
+        android:id="@+id/btn_prev"
+        android:icon="@drawable/btn_prev"
+        android:title="Next"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/btn_next"
+        android:icon="@drawable/btn_next"
+        android:title="Next"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/btn_reload"
+        android:icon="@drawable/btn_reload"
+        android:title="Next"
+        app:showAsAction="always" />
+</menu>
