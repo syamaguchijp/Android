@@ -2,10 +2,12 @@ package com.example.samplethread
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.Executors
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.thread
@@ -25,6 +27,8 @@ class MainActivity : AppCompatActivity() {
         //runSubThread()
         //runSubThread2()
         //runExclusiveThread()
+
+        //runExecutor()
     }
 
     //region Coroutine
@@ -140,12 +144,38 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     fun dumpTest2(lock: Lock, number: Int) {
         lock.withLock {
             println("#$number start. thread=${Thread.currentThread().name}")
             Thread.sleep(1000)
             println("#$number end.")
         }
+    }
+
+    //endregion
+
+    //region Executors
+
+    fun runExecutor() {
+
+        println("runHandler start. thread=${Thread.currentThread().name}")
+
+        val handler = Handler()
+        val executor = Executors.newSingleThreadExecutor()
+        executor.execute(object: Runnable {
+            override fun run() {
+                //  サブスレッド
+                println("executor start. thread=${Thread.currentThread().name}")
+
+                handler.post(object: Runnable {
+                    override fun run() {
+                        // メインスレッド
+                        println("handler post. thread=${Thread.currentThread().name}")
+                    }
+                })
+            }
+        })
     }
 
     //endregion
