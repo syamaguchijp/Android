@@ -177,7 +177,7 @@ fun main() {
 
     //region 辞書
 
-    val map: MutableMap<String, Int> = mutableMapOf<String, Int>("a" to 1, "b" to 2, "c" to 3)
+    val map: MutableMap<String, Int> = mutableMapOf<String, Int>("a" to 1, "b" to 2, "c" to 3) // KeyとValueはAny型も指定可能
     map["a"] = 777 // 要素の変更
     map["d"] = 4 // 要素の追加
 
