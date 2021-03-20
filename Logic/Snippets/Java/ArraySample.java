@@ -71,6 +71,8 @@ public class ArraySample {
             add("Tokyo");
             add("osaka");
         }};
+        List<String> list5 = Arrays.asList("AA", "BB", "CC");
+        
         // リストの要素数
         System.out.println(list4.size());
 
