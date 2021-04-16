@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">TopTab</string>
+    <string name="tab_text_1">Google</string>
+    <string name="tab_text_2">Yahoo</string>
+    <string name="tab_text_3">Apple</string>
+    <string name="tab_text_4">Amazon</string>
+    <string name="tab_text_5">Github</string>
+
+</resources>
