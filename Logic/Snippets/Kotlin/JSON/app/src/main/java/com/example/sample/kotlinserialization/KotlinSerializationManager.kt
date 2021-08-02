@@ -13,7 +13,8 @@ class KotlinSerializationManager {
             [{"title":"タイトル","user":{"id":"ABCDE","profile_image_url":"imageURL1"}},
             {"title":"タイトル2","user":{"id":"ABCDE2","profile_image_url":"imageURL2"}}]
             """
-        val myDataList = Json.decodeFromString<List<MyData>>(str)
+        val json = Json { ignoreUnknownKeys = true } // 定義にはない属性が文字列に含まれていても無視できる
+        val myDataList = json.decodeFromString<List<MyData>>(str)
         println(myDataList)
 
         // オブジェクトから文字列へ
