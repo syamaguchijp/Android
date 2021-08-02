@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.sample.gson.GsonManager
 import com.example.sample.jsonobject.JsonObjectManager
+import com.example.sample.kotlinserialization.KotlinSerializationManager
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -13,5 +14,7 @@ class MainActivity : AppCompatActivity() {
         GsonManager().test()
 
         JsonObjectManager().test()
+
+        KotlinSerializationManager().test()
     }
 }
