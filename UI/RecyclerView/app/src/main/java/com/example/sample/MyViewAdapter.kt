@@ -54,7 +54,6 @@ class MyViewAdapter(private val context: Context, private val itemClickListener:
             val rowData = rowDataList.get(position)
             it.rowTextView.text = rowData.title
             Glide.with(context).load(rowData.user.profile_image_url).into(it.rowImageView)
-            it.rowImageView.setImageResource(R.mipmap.ic_launcher)
         }
     }
 
