@@ -19,9 +19,10 @@ import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
 
-    val customViewHeight = 300
+    private val minContentsHeight = 300
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -47,7 +48,7 @@ class MainActivity : AppCompatActivity() {
         val button4 = findViewById<Button>(R.id.button4)
         button4.stateListAnimator = null
         button4.setOnClickListener {
-            val message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+            val message = "Lorem ipsum dolor sit amet"
             showCustomViewTop(message)
         }
     }
@@ -85,7 +86,7 @@ class MainActivity : AppCompatActivity() {
         return snackbar
     }
 
-    fun showCustomViewBottom(message: String) {
+    private fun showCustomViewBottom(message: String) {
 
         val constraintLayout = findViewById<ConstraintLayout>(R.id.constraint_layout)
         val customView = generateCustomView()
@@ -141,18 +142,10 @@ class MainActivity : AppCompatActivity() {
         customView.bringToFront()
         textView.bringToFront()
 
-        var finishedAnimation = false
-        customView.viewTreeObserver.addOnGlobalLayoutListener {
-            // レイアウトが変更されるたびにコールされる
-            println("##### customView.height = ${customView.height}")
-            if (!finishedAnimation) {
-                finishedAnimation = true
-                startAnimation(customView, textView, false)
-            }
-        }
+        modLayout(customView, textView, false)
     }
 
-    fun showCustomViewTop(message: String) {
+    private fun showCustomViewTop(message: String) {
 
         val constraintLayout = findViewById<ConstraintLayout>(R.id.constraint_layout)
         val customView = generateCustomView()
@@ -208,22 +201,15 @@ class MainActivity : AppCompatActivity() {
         customView.bringToFront()
         textView.bringToFront()
 
-        var finishedAnimation = false
-        customView.viewTreeObserver.addOnGlobalLayoutListener {
-            // レイアウトが変更されるたびにコールされる
-            println("##### customView.height = ${customView.height}")
-            if (!finishedAnimation) {
-                finishedAnimation = true
-                startAnimation(customView, textView, true)
-            }
-        }
+        modLayout(customView, textView, true)
     }
 
-    fun generateTextView(message: String): TextView {
+    private fun generateTextView(message: String): TextView {
 
         val textView = TextView(this)
         textView.id = View.generateViewId()
         textView.text = message
+        textView.setGravity(Gravity.CENTER_VERTICAL)
         val pad = 10
         textView.setPadding(pad, pad, pad, pad)
         val params = LayoutParams(
@@ -233,7 +219,7 @@ class MainActivity : AppCompatActivity() {
         return textView
     }
 
-    fun generateCustomView(): View {
+    private fun generateCustomView(): View {
 
         val customView = View(this)
         customView.id = View.generateViewId()
@@ -246,8 +232,33 @@ class MainActivity : AppCompatActivity() {
         return customView
     }
 
-    fun startAnimation(customView: View, textView: TextView, isTop: Boolean) {
+    private fun modLayout(customView: View, textView: TextView, isTop: Boolean) {
 
+        textView.viewTreeObserver.addOnGlobalLayoutListener {
+            // レイアウトが変更されるたびにコールされる
+            println("##### textView.height = ${textView.height}")
+            // TextViewの高さが小さいときは補正
+            if (textView.height < minContentsHeight) {
+                textView.height = minContentsHeight + 1
+            }
+        }
+
+        var finishedAnimation = false
+        customView.viewTreeObserver.addOnGlobalLayoutListener {
+            // レイアウトが変更されるたびにコールされる
+            println("##### customView.height = ${customView.height}")
+            if (textView.height >= minContentsHeight) { // TextViewの高さ補正後にアニメーションを開始する
+                if (!finishedAnimation) {
+                    finishedAnimation = true
+                    startAnimation(customView, textView, isTop)
+                }
+            }
+        }
+    }
+
+    private fun startAnimation(customView: View, textView: TextView, isTop: Boolean) {
+
+        println("startAnimation customView.height=${customView.height}")
         var multiple = 1
         if (!isTop) {
             multiple = -1
@@ -264,6 +275,11 @@ class MainActivity : AppCompatActivity() {
         val animatorSet = AnimatorSet()
         animatorSet.playTogether(animatorList)
         animatorSet.start()
+
+        customView.setOnClickListener {
+            // タップされたときに、表示時とは逆のアニメーションを行って閉じる
+            startAnimation(customView, textView, !isTop)
+        }
     }
 
 }
