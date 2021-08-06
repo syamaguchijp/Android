@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Sample</string>
+
+    <string-array name="list">
+    <item>東京都</item>
+    <item>神奈川県</item>
+    <item>埼玉県</item>
+    <item>千葉県</item>
+</string-array>
+</resources>
