@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
@@ -22,9 +23,21 @@ class MainActivity : AppCompatActivity() {
             setHasFixedSize(true)
             layoutManager = viewManager
         }
+        // SwipeRefreshLayout
+        val swipeRefreshLayout = findViewById<SwipeRefreshLayout>(R.id.swiperefresh)
+        swipeRefreshLayout.setOnRefreshListener {
+            println("OnRefresh")
+            startNetworking(recyclerView, swipeRefreshLayout)
+        }
+
+        startNetworking(recyclerView, swipeRefreshLayout)
+    }
+
+    private fun startNetworking(recyclerView: RecyclerView, swipeRefreshLayout: SwipeRefreshLayout) {
 
         val query = mutableMapOf<String, String>("per_page" to "50")
-        NetworkManager().get("https://qiita.com/api/v2/items", query, { statusCode: Int, responseBody: String ->
+        NetworkManager().get("https://qiita.com/api/v2/items", query,
+            { statusCode: Int, responseBody: String ->
 
             Logging.d("complete!!! ${responseBody}")
 
@@ -41,7 +54,8 @@ class MainActivity : AppCompatActivity() {
                     adapter = viewAdapter
                 }
             }
+
+            swipeRefreshLayout.isRefreshing = false
         })
     }
-
 }
