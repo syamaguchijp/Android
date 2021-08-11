@@ -5,7 +5,8 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 
-class BalloonTriangleView @JvmOverloads constructor(
+// 矢印
+open class BalloonTriangleView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
@@ -14,6 +15,12 @@ class BalloonTriangleView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
+        canvas?.let {
+            drawTriangle(it)
+        }
+    }
+
+    open fun drawTriangle(canvas: Canvas) {
 
         paint.setColor(bgColor)
         paint.setStrokeWidth(1f)
@@ -32,7 +39,6 @@ class BalloonTriangleView @JvmOverloads constructor(
         path.lineTo(a.x.toFloat(), a.y.toFloat())
 
         path.close()
-        canvas?.drawPath(path, paint);
-
+        canvas.drawPath(path, paint)
     }
 }
