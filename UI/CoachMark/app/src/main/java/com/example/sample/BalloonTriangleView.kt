@@ -10,11 +10,12 @@ class BalloonTriangleView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
     val paint = Paint()
+    var bgColor: Int = Color.BLUE
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
 
-        paint.setColor(Color.GRAY)
+        paint.setColor(bgColor)
         paint.setStrokeWidth(1f)
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
         paint.setAntiAlias(true);

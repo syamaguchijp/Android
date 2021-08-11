@@ -9,14 +9,40 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 
+enum class BalloonViewVertical {
+    TOP, BOTTOM
+}
+enum class BalloonViewHorizontal {
+    LEFT, CENTER, RIGHT,
+}
+
 class BalloonViewManager {
 
-    fun startCoachMarkBottom(v: View, context: Context, constraintLayout: ConstraintLayout,
-                             message: String, targetView: View) {
+    fun startCoachMarkBottomLeft(v: View, context: Context, constraintLayout: ConstraintLayout,
+                             message: String, targetView: View, widthPersent: Float, bgColor: Int) {
+        startCoachMark(v, context, constraintLayout, message, targetView,
+            BalloonViewVertical.BOTTOM, BalloonViewHorizontal.LEFT, widthPersent, bgColor)
+    }
 
-        val balloonTriangleView = generateBalloonTriangleView(context)
+    fun startCoachMarkBottomCenter(v: View, context: Context, constraintLayout: ConstraintLayout,
+                                 message: String, targetView: View, widthPersent: Float, bgColor: Int) {
+        startCoachMark(v, context, constraintLayout, message, targetView,
+            BalloonViewVertical.BOTTOM, BalloonViewHorizontal.CENTER, widthPersent, bgColor)
+    }
+
+    fun startCoachMarkBottomRight(v: View, context: Context, constraintLayout: ConstraintLayout,
+                                 message: String, targetView: View, widthPersent: Float, bgColor: Int) {
+        startCoachMark(v, context, constraintLayout, message, targetView,
+            BalloonViewVertical.BOTTOM, BalloonViewHorizontal.RIGHT, widthPersent, bgColor)
+    }
+
+    private fun startCoachMark(v: View, context: Context, constraintLayout: ConstraintLayout,
+                             message: String, targetView: View, vPosition: BalloonViewVertical,
+                             hPosition: BalloonViewHorizontal, widthPersent: Float, bgColor: Int) {
+
+        val balloonTriangleView = generateBalloonTriangleView(context, bgColor)
         constraintLayout.addView(balloonTriangleView)
-        val balloonView = generateBalloonView(context)
+        val balloonView = generateBalloonView(context, bgColor)
         constraintLayout.addView(balloonView)
         val balloonTextView = generateBalloonTextView(message, context)
         constraintLayout.addView(balloonTextView)
@@ -24,18 +50,27 @@ class BalloonViewManager {
         // BalloonTriangleViewのConstraint
         val constraintSet = ConstraintSet()
         constraintSet.clone(constraintLayout)
-        constraintSet.connect( // TOP
-            balloonTriangleView.id,
-            ConstraintSet.TOP,
-            targetView.id,
-            ConstraintSet.BOTTOM,
-            0
-        )
+        if (vPosition == BalloonViewVertical.BOTTOM) {
+            constraintSet.connect( // TOP
+                balloonTriangleView.id,
+                ConstraintSet.TOP,
+                targetView.id,
+                ConstraintSet.BOTTOM,
+                0
+            )
+        }
         constraintSet.connect( // START
             balloonTriangleView.id,
             ConstraintSet.START,
             targetView.id,
             ConstraintSet.START,
+            0
+        )
+        constraintSet.connect( // END
+            balloonTriangleView.id,
+            ConstraintSet.END,
+            targetView.id,
+            ConstraintSet.END,
             0
         )
         constraintSet.constrainWidth(balloonTriangleView.id, 50)
@@ -45,37 +80,42 @@ class BalloonViewManager {
         // balloonViewのConstraint
         val constraintSet2 = ConstraintSet()
         constraintSet2.clone(constraintLayout)
-        constraintSet2.connect( // TOP
-            balloonView.id,
-            ConstraintSet.TOP,
-            balloonTriangleView.id,
-            ConstraintSet.BOTTOM,
-            0
-        )
-        constraintSet2.connect( // BOTTOM
-            balloonView.id,
-            ConstraintSet.BOTTOM,
-            balloonTextView.id,
-            ConstraintSet.BOTTOM,
-            0
-        )
+        if (vPosition == BalloonViewVertical.BOTTOM) {
+            constraintSet2.connect( // TOP
+                balloonView.id,
+                ConstraintSet.TOP,
+                balloonTriangleView.id,
+                ConstraintSet.BOTTOM,
+                0
+            )
+            constraintSet2.connect( // BOTTOM
+                balloonView.id,
+                ConstraintSet.BOTTOM,
+                balloonTextView.id,
+                ConstraintSet.BOTTOM,
+                0
+            )
+        }
         constraintSet2.constrainWidth(balloonView.id, 0)
-        constraintSet2.constrainPercentWidth(balloonView.id, 0.5f)
-        constraintSet2.connect( // START
-            balloonView.id,
-            ConstraintSet.START,
-            ConstraintSet.PARENT_ID,
-            ConstraintSet.START,
-            20
-        )
-        /*
-        constraintSet2.connect( // END
-            balloonView.id,
-            ConstraintSet.END,
-            ConstraintSet.PARENT_ID,
-            ConstraintSet.END,
-            20
-        )*/
+        constraintSet2.constrainPercentWidth(balloonView.id, widthPersent)
+        if (hPosition == BalloonViewHorizontal.LEFT || hPosition == BalloonViewHorizontal.CENTER) {
+            constraintSet2.connect( // START
+                balloonView.id,
+                ConstraintSet.START,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.START,
+                30
+            )
+        }
+        if (hPosition == BalloonViewHorizontal.RIGHT || hPosition == BalloonViewHorizontal.CENTER) {
+            constraintSet2.connect( // END
+                balloonView.id,
+                ConstraintSet.END,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.END,
+                30
+            )
+        }
         constraintSet2.applyTo(constraintLayout)
 
         // BalloonTextViewのConstraint
@@ -116,14 +156,17 @@ class BalloonViewManager {
         balloonTextView.bringToFront()
     }
 
-    private fun generateBalloonTriangleView(context: Context): BalloonTriangleView {
+    // 矢印部分
+    private fun generateBalloonTriangleView(context: Context, bgColor: Int): BalloonTriangleView {
 
         val triangleView = BalloonTriangleView(context)
+        triangleView.bgColor = bgColor
         triangleView.id = View.generateViewId()
         return triangleView
     }
 
-    private fun generateBalloonView(context: Context): View {
+    // 長方形部分
+    private fun generateBalloonView(context: Context, bgColor: Int): View {
 
         val customView = View(context)
         customView.id = View.generateViewId()
@@ -135,13 +178,14 @@ class BalloonViewManager {
         // 角丸
         val shape = GradientDrawable()
         shape.setShape(GradientDrawable.RECTANGLE)
-        shape.setColor(Color.GRAY)
+        shape.setColor(bgColor)
         shape.setCornerRadius(15f)
         customView.setBackground(shape)
 
         return customView
     }
 
+    // 長方形内のTextView
     private fun generateBalloonTextView(message: String, context: Context): TextView {
 
         val textView = TextView(context)

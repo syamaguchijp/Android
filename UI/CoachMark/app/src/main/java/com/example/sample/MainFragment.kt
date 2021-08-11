@@ -1,5 +1,6 @@
 package com.example.sample
 
+import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -32,12 +33,14 @@ class MainFragment : Fragment() {
         val targetView = v.findViewById<TextView>(R.id.textView2)
         val message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex"
         context?.let {
-            BalloonViewManager().startCoachMarkBottom(
+            BalloonViewManager().startCoachMarkBottomRight(
                 v,
                 it,
                 constraintLayout,
                 message,
-                targetView
+                targetView,
+                0.7f,
+                Color.GRAY
             )
         }
     }
