@@ -15,6 +15,7 @@ import android.webkit.WebViewClient
 import android.widget.ProgressBar
 import androidx.appcompat.view.menu.ActionMenuItemView
 import androidx.appcompat.widget.Toolbar
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
 
 class MyFragment : Fragment() {
@@ -42,6 +43,14 @@ class MyFragment : Fragment() {
 
         webView.loadUrl("https://www.google.com")
 
+        // SwipeRefreshLayout
+
+        val swipeRefreshLayout = v.findViewById<SwipeRefreshLayout>(R.id.swiperefresh)
+        swipeRefreshLayout.setOnRefreshListener {
+            println("OnRefresh")
+            webView.reload()
+        }
+
         // ToolBar
 
         val toolbar = v.findViewById(R.id.toolbar) as Toolbar
@@ -65,11 +74,13 @@ class MyFragment : Fragment() {
         webView.webViewClient = object: WebViewClient(){
 
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                println("onPageStarted")
                 super.onPageStarted(view, url, favicon)
                 progressBar.visibility = View.VISIBLE
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
+                println("onPageFinished")
                 super.onPageFinished(view, url)
                 progressBar.visibility = View.GONE
 
@@ -83,6 +94,7 @@ class MyFragment : Fragment() {
                 } else {
                     nextButton.setVisibility(INVISIBLE)
                 }
+                swipeRefreshLayout.isRefreshing = false
             }
         }
 
