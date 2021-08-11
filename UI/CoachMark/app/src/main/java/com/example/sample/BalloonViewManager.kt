@@ -6,15 +6,14 @@ import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 import android.view.View
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 
 class BalloonViewManager {
 
-    fun startCoachMarkBottom(v: AppCompatActivity, context: Context, message: String, targetView: View) {
+    fun startCoachMarkBottom(v: View, context: Context, constraintLayout: ConstraintLayout,
+                             message: String, targetView: View) {
 
-        val constraintLayout = v.findViewById<ConstraintLayout>(R.id.constraint_layout)
         val balloonTriangleView = generateBalloonTriangleView(context)
         constraintLayout.addView(balloonTriangleView)
         val balloonView = generateBalloonView(context)

@@ -17,10 +17,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val targetView = findViewById<TextView>(R.id.textView)
-        val message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex"
+        val fragment = MainFragment()
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.add(R.id.container, fragment)
+        transaction.commit()
 
-        BalloonViewManager().startCoachMarkBottom(this, this, message, targetView)
     }
 
 }
