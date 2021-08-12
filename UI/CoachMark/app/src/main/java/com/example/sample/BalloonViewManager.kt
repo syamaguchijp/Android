@@ -4,7 +4,9 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -58,12 +60,27 @@ class BalloonViewManager {
                              message: String, targetView: View, vPosition: BalloonViewVertical,
                              hPosition: BalloonViewHorizontal, widthPersent: Float, bgColor: Int) {
 
+        // コーチマークを形成するViewを生成
         val balloonTriangleView = generateBalloonTriangleView(context, bgColor, vPosition)
         constraintLayout.addView(balloonTriangleView)
         val balloonView = generateBalloonView(context, bgColor)
         constraintLayout.addView(balloonView)
         val balloonTextView = generateBalloonTextView(message, context)
         constraintLayout.addView(balloonTextView)
+
+        // タップされたらコーチマークを消す
+        balloonView.setOnTouchListener { v, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    constraintLayout.removeView(balloonTriangleView)
+                    constraintLayout.removeView(balloonView)
+                    constraintLayout.removeView(balloonTextView)
+                }
+            }
+            true
+        }
+
+        // Constraintの設定
 
         // BalloonTriangleViewのConstraint
         val constraintSet = ConstraintSet()
