@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity(), LocationObserverCallback {
             return
         }
 
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             Logging.d("REQUEST_PERMISSION")
             locationObserver.startLocation(this)
 
