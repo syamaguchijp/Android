@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity(), LocationObserverCallback {
 
         Logging.d("")
         super.onResume()
-        
+
         locationObserver?.let {
             it.checkPermission()
         }

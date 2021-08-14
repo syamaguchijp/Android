@@ -21,7 +21,7 @@ interface WifiObserverCallback {
     fun didGetCurrentWifi(wifi: WifiInfo?)
 }
 
-class WifiObserver {
+class WifiObserver constructor(var context: Context, var activity: Activity) {
 
     var callbackRef: WeakReference<WifiObserverCallback>? = null // 弱参照
 
@@ -29,9 +29,14 @@ class WifiObserver {
         val PERMISSIONS_REQUEST_CODE = 10
     }
 
-    var wifiManager: WifiManager? = null
+    var wifiManager: WifiManager
 
-    fun checkPermission(context: Context, activity: Activity) {
+    init {
+        Logging.d("")
+        wifiManager = activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+    }
+
+    fun checkPermission() {
 
         Logging.d("")
 
@@ -45,15 +50,15 @@ class WifiObserver {
                     ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_NETWORK_STATE) !=
                     PackageManager.PERMISSION_GRANTED)
         ){
-            requestPermission(activity)
+            requestPermission()
 
         } else {
-            startScan(activity)
+            startScan()
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
-    private fun requestPermission(activity: Activity) {
+    private fun requestPermission() {
 
         Logging.d("")
 
@@ -65,11 +70,10 @@ class WifiObserver {
             PERMISSIONS_REQUEST_CODE)
     }
 
-    fun startScan(activity: Activity) {
+    fun startScan() {
 
         Logging.d("")
 
-        wifiManager = activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         retrieveScanResult()
 
         // deprecated (startScan)
@@ -98,10 +102,9 @@ class WifiObserver {
         if (wifiManager?.wifiState == WifiManager.WIFI_STATE_ENABLED) {
             val results = wifiManager?.scanResults
             val callback = callbackRef?.get()
-            if (results != null) {
-                callback?.didGetWifiState(results)
+            results?.let {
+                callback?.didGetWifiState(it)
             }
-
             retrieveCurrentWifi()
         }
     }
