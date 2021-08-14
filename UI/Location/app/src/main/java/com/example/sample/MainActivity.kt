@@ -13,18 +13,28 @@ import java.lang.ref.WeakReference
 
 class MainActivity : AppCompatActivity(), LocationObserverCallback {
 
-    val locationObserver = LocationObserver()
+    var locationObserver: LocationObserver? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        Logging.d("")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        locationObserver.callbackRef = WeakReference<LocationObserverCallback>(this)
+        locationObserver = LocationObserver(this, this)
+        locationObserver?.let {
+            it.callbackRef = WeakReference<LocationObserverCallback>(this)
+        }
     }
 
     override fun onResume() {
+
+        Logging.d("")
         super.onResume()
-        locationObserver.checkPermission(this, this)
+        
+        locationObserver?.let {
+            it.checkPermission()
+        }
     }
 
     // 権限許諾に関する結果がコールバックされる
@@ -40,20 +50,24 @@ class MainActivity : AppCompatActivity(), LocationObserverCallback {
 
         if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             Logging.d("REQUEST_PERMISSION")
-            locationObserver.startLocation(this)
+            locationObserver?.let {
+                it.startLocation()
+            }
 
         } else {
             Logging.d("REQUEST_PERMISSION DENIED")
-            locationObserver.showSnackBar(this, "「権限」の設定に移行し、位置情報を許可してください。", {
-                val intent = Intent()
-                intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                val uri: Uri = Uri.fromParts(
-                    "package", BuildConfig.APPLICATION_ID, null
-                )
-                intent.data = uri
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                startActivity(intent)
-            })
+            locationObserver?.let {
+                it.showSnackBar(this, "「権限」の設定に移行し、位置情報を許可してください。", {
+                    val intent = Intent()
+                    intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                    val uri: Uri = Uri.fromParts(
+                        "package", BuildConfig.APPLICATION_ID, null
+                    )
+                    intent.data = uri
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    startActivity(intent)
+                })
+            }
         }
     }
 

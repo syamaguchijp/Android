@@ -26,26 +26,33 @@ interface LocationObserverCallback {
     fun didUpdateLocation(location: Location)
 }
 
-class LocationObserver {
+class LocationObserver constructor(var context: Context, var activity: Activity) {
 
     var callbackRef: WeakReference<LocationObserverCallback>? = null // 弱参照
+
+    private val locationClient: FusedLocationProviderClient
+    private var locationCallback: LocationCallback? = null
 
     companion object {
         val REQUEST_PERMISSION = 10
     }
 
+    init {
+        Logging.d("")
+        locationClient = FusedLocationProviderClient(context)
+    }
+
     // 位置情報の権限の確認
-    fun checkPermission(context: Context, activity: Activity) {
+    fun checkPermission() {
 
         Logging.d("")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
             ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED) {
-            requestLocationPermission(activity)
-
+            requestLocationPermission()
         } else {
-            startLocation(context)
+            startLocation()
         }
     }
 
@@ -74,7 +81,7 @@ class LocationObserver {
     }
 
     // 位置情報の権限の許諾を求める
-    private fun requestLocationPermission(activity: Activity) {
+    private fun requestLocationPermission() {
 
         Logging.d("")
 
@@ -84,16 +91,16 @@ class LocationObserver {
             Logging.d("shouldShowRequestPermissionRationale")
 
             showSnackBar(activity, "XXXXXXの理由により位置情報を取得します。", {
-                requestPermissionFineLocation(activity)
+                requestPermissionFineLocation()
             })
 
         } else {
             Logging.d("else")
-            requestPermissionFineLocation(activity)
+            requestPermissionFineLocation()
         }
     }
 
-    private fun requestPermissionFineLocation(activity: Activity) {
+    private fun requestPermissionFineLocation() {
 
         Logging.d("")
 
@@ -104,21 +111,19 @@ class LocationObserver {
     }
 
     @SuppressLint("MissingPermission")
-    fun startLocation(context: Context) {
+    fun startLocation() {
 
         Logging.d("")
 
-        val client = FusedLocationProviderClient(context)
-
         // 現在の位置情報を取得する
-        client.lastLocation.addOnSuccessListener {
+        locationClient.lastLocation.addOnSuccessListener {
             Logging.d("onSuccessListener ${it.latitude} ${it.longitude}")
         }
 
         // 位置情報の更新を受け取る
-        val locationRequest =
-            LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-        client.requestLocationUpdates(locationRequest, object : LocationCallback() {
+        val locationRequest = LocationRequest.create().setPriority(
+            LocationRequest.PRIORITY_HIGH_ACCURACY)
+        locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
                 val location: Location = locationResult.lastLocation
@@ -126,6 +131,15 @@ class LocationObserver {
                 val callback = callbackRef?.get()
                 callback?.didUpdateLocation(location)
             }
-        }, null)
+        }
+        locationClient.requestLocationUpdates(locationRequest, locationCallback, null)
+    }
+
+    fun stopLocation() {
+
+        Logging.d("")
+
+        // 更新終了する場合
+        locationClient.removeLocationUpdates(locationCallback)
     }
 }
