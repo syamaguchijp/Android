@@ -40,6 +40,11 @@ class DashboardFragment : Fragment() {
         return root
     }
 
+    override fun onResume() {
+        Logging.d("")
+        super.onResume()
+    }
+
     override fun onDestroyView() {
         Logging.d("")
         super.onDestroyView()

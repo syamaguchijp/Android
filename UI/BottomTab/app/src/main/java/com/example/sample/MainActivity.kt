@@ -1,13 +1,16 @@
 package com.example.sample
 
 import android.os.Bundle
+import android.widget.Button
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentTransaction
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.sample.databinding.ActivityMainBinding
+import com.example.sample.ui.home.SecondFragment
 
 class MainActivity : AppCompatActivity() {
 
