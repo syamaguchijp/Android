@@ -1,8 +1,8 @@
 # Android Sample Code
 
-## Logic
+## 1 Logic
 
-### Algorithm（アルゴリズム）
+### 1-1 Algorithm（アルゴリズム）
  -   Stack_LIFO（スタック）
  -   Queue_FIFO（キュー、リングバッファ）
  -   Sentinel（番兵法）
@@ -14,48 +14,49 @@
  -   RoundRobin（総当り作成）
  -   Dijkstra（ダイクストラ法、最短経路）
 
-### DataPersistence（データ永続化）
+### 1-2 DataPersistence（データ永続化）
  -   SQLite
  -   Room
  -   SharedPreferences
  -   File
  -   Realm
  
-### DesignPattern（デザインパターン）
+### 1-3 DesignPattern（デザインパターン）
 
-##### GoF（Gang of Four）
- -   Creation（生成に関するパターン）
-  -   Builder
-  -   Factory
-  -   Prototype
-  -   Singleton
- -   Structure（構造に関するパターン）
-  -   Adapter
-  -   Bridge
-  -   Composite
-  -   Decorator
-  -   Facade
-  -   Flyweight
-  -   Proxy
- -   Behavior（振る舞いに関するパターン）
-  -   Command
-  -   Mediator
-  -   Memento
-  -   Observer
-  -   Strategy
-  -   TemplateMethod
-  -   Visitor
+##### 1-3-1  GoF（Gang of Four）
 
-##### Architecture
+- Creation（生成に関するパターン）
+   -   Builder
+   -   Factory
+   -   Prototype
+   -   Singleton
+- Structure（構造に関するパターン）
+   -   Adapter
+   -   Bridge
+   -   Composite
+   -   Decorator
+   -   Facade
+   -   Flyweight
+   -   Proxy
+- Behavior（振る舞いに関するパターン）
+   -   Command
+   -   Mediator
+   -   Memento
+   -   Observer
+   -   Strategy
+   -   TemplateMethod
+   -   Visitor
+ 
+##### 1-3-2  Architecture
 - MVP
 - MVVM
 
-### Snippets
+### 1-4 Snippets
 - Java
 - Kotlin
 
 
-## UI
+## 2 UI
 
 
 
