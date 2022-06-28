@@ -1,6 +1,5 @@
 package com.example.sample
 
-import android.app.Activity.RESULT_CANCELED
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -10,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 
 
@@ -18,6 +16,7 @@ class MainFragment : Fragment() {
 
     private val Image_Capture_Code = 1
     private var imageView: ImageView? = null
+    private var cameraObserver: CameraObserver? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +36,21 @@ class MainFragment : Fragment() {
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             startActivityForResult(intent, Image_Capture_Code)
         }
+
+        getContext()?.let { getActivity()?.let { it1 ->
+            cameraObserver = CameraObserver(it, it1) } }
+
         return v
+    }
+
+    override fun onResume() {
+
+        Logging.d("")
+        super.onResume()
+
+        cameraObserver?.let {
+            it.checkCameraPermission()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
