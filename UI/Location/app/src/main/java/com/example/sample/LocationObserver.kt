@@ -108,6 +108,7 @@ class LocationObserver constructor(var context: Context, var activity: Activity)
             activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
             REQUEST_PERMISSION
         )
+        // Android10からは、常に許可を求める場合は、ACCESS_BACKGROUND_LOCATIONも必要
     }
 
     @SuppressLint("MissingPermission")
