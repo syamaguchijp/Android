@@ -95,7 +95,7 @@ class LocationObserver constructor(var context: Context, var activity: AppCompat
     ) { permissions ->
         when {
             permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                Logging.d("ACCESS_COARSE_LOCATION granted")
+                Logging.d("ACCESS_FINE_LOCATION granted")
                 startLocation()
             }
             permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
@@ -103,7 +103,7 @@ class LocationObserver constructor(var context: Context, var activity: AppCompat
                 startLocation()
             }
             else -> {
-                Logging.d("else")
+                Logging.d("not granted, so return.")
             }
         }
     }
