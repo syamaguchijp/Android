@@ -26,45 +26,6 @@ class MainActivity : AppCompatActivity(), LocationObserverCallback {
         locationObserver.start()
     }
 
-    override fun onResume() {
-
-        Logging.d("")
-        super.onResume()
-    }
-
-    // 権限許諾に関する結果がコールバックされる
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>,
-                                   grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        Logging.d("")
-
-        if (requestCode != LocationObserver.REQUEST_PERMISSION) {
-            return
-        }
-
-        if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Logging.d("REQUEST_PERMISSION")
-            locationObserver.startLocation()
-
-        } else {
-            Logging.d("REQUEST_PERMISSION DENIED")
-            /*
-            locationObserver.showSnackBar(this, "「権限」の設定に移行し、位置情報を許可してください。", {
-                val intent = Intent()
-                intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                val uri: Uri = Uri.fromParts(
-                    "package", BuildConfig.APPLICATION_ID, null
-                )
-                intent.data = uri
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                startActivity(intent)
-            })
-
-             */
-        }
-    }
-
     // LocationObserverCallback
     override fun didUpdateLocation(location: Location) {
 

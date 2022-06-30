@@ -14,6 +14,8 @@ import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -26,7 +28,7 @@ interface LocationObserverCallback {
     fun didUpdateLocation(location: Location)
 }
 
-class LocationObserver constructor(var context: Context, var activity: Activity) {
+class LocationObserver constructor(var context: Context, var activity: AppCompatActivity) {
 
     var callbackRef: WeakReference<LocationObserverCallback>? = null // 弱参照
 
@@ -88,23 +90,43 @@ class LocationObserver constructor(var context: Context, var activity: Activity)
         }
     }
 
+    private val permissionLauncher = activity.registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        when {
+            permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
+                Logging.d("ACCESS_COARSE_LOCATION granted")
+                startLocation()
+            }
+            permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
+                Logging.d("ACCESS_COARSE_LOCATION granted")
+                startLocation()
+            }
+            else -> {
+                Logging.d("else")
+            }
+        }
+    }
+
     private fun requestPermissions() {
 
         Logging.d("")
 
-        var requestArray = arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
+        permissionLauncher.launch(requestArray())
+    }
+
+    private fun requestArray(): Array<String> {
+
+        var ary = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
         )
-        ActivityCompat.requestPermissions(
-            activity, requestArray, REQUEST_PERMISSION
-        )
+        return ary
     }
 
     //endregion
 
     @SuppressLint("MissingPermission")
-    fun startLocation() {
+    private fun startLocation() {
 
         Logging.d("")
 
