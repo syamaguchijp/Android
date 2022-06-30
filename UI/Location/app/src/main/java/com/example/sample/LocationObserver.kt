@@ -31,7 +31,7 @@ class LocationObserver constructor(var context: Context, var activity: Activity)
     var callbackRef: WeakReference<LocationObserverCallback>? = null // 弱参照
 
     private val locationClient: FusedLocationProviderClient
-    private var locationCallback: LocationCallback? = null
+    private lateinit var locationCallback: LocationCallback
 
     companion object {
         val REQUEST_PERMISSION = 10
@@ -42,46 +42,36 @@ class LocationObserver constructor(var context: Context, var activity: Activity)
         locationClient = FusedLocationProviderClient(context)
     }
 
+    fun start() {
+
+        Logging.d("")
+
+        checkPermission()
+    }
+
+    //region 許諾
+
     // 位置情報の権限の確認
     fun checkPermission() {
 
         Logging.d("")
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-            ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED) {
-            requestLocationPermission()
-        } else {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             startLocation()
+            return
         }
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED) {
+            startLocation()
+            return
+        }
+        checkPermissionRationale()
     }
 
-    fun showSnackBar(activity: Activity, message: String, closure:()->Unit) {
-
-        Logging.d("")
-
-        val rootLayout: View = activity.findViewById(android.R.id.content)
-        val snackbar = Snackbar.make(rootLayout, message, Snackbar.LENGTH_INDEFINITE)
-        snackbar.setAction("OK") {
-            Logging.d("closure")
-            closure()
-        }
-        snackbar.view.setBackgroundColor(Color.GRAY)
-        val snackTextView: TextView = snackbar.view.findViewById(com.google.android.material.R.id.snackbar_text)
-        snackTextView.setTextColor(Color.WHITE)
-        snackTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20.0f)
-        val snackActionView: Button = snackbar.view.findViewById(com.google.android.material.R.id.snackbar_action)
-        snackActionView.setBackgroundColor(Color.BLACK)
-        snackActionView.setTextColor(Color.RED)
-        val view = snackbar.view
-        val params = view.layoutParams as FrameLayout.LayoutParams
-        params.gravity = Gravity.TOP
-        view.layoutParams = params
-        snackbar.show()
-    }
-
-    // 位置情報の権限の許諾を求める
-    private fun requestLocationPermission() {
+    // PermissionRationaleをチェックする
+    private fun checkPermissionRationale() {
 
         Logging.d("")
 
@@ -89,27 +79,29 @@ class LocationObserver constructor(var context: Context, var activity: Activity)
                 activity, Manifest.permission.ACCESS_FINE_LOCATION)) {
             // 以前許諾を拒否された場合などの再表示が必要なときにコールされ、ここでアプリが権限を必要とする理由を説明する
             Logging.d("shouldShowRequestPermissionRationale")
-
             showSnackBar(activity, "XXXXXXの理由により位置情報を取得します。", {
-                requestPermissionFineLocation()
+                requestPermissions()
             })
-
         } else {
             Logging.d("else")
-            requestPermissionFineLocation()
+            requestPermissions()
         }
     }
 
-    private fun requestPermissionFineLocation() {
+    private fun requestPermissions() {
 
         Logging.d("")
 
-        ActivityCompat.requestPermissions(
-            activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-            REQUEST_PERMISSION
+        var requestArray = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
         )
-        // Android10からは、常に許可を求める場合は、ACCESS_BACKGROUND_LOCATIONも必要
+        ActivityCompat.requestPermissions(
+            activity, requestArray, REQUEST_PERMISSION
+        )
     }
+
+    //endregion
 
     @SuppressLint("MissingPermission")
     fun startLocation() {
@@ -127,10 +119,14 @@ class LocationObserver constructor(var context: Context, var activity: Activity)
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
-                val location: Location = locationResult.lastLocation
-                Logging.d("onLocationResult ${location.latitude} ${location.longitude}")
-                val callback = callbackRef?.get()
-                callback?.didUpdateLocation(location)
+                locationResult?.let {
+                    val location = it.lastLocation
+                    location?.let {
+                        Logging.d("onLocationResult ${location.latitude} ${location.longitude}")
+                        val callback = callbackRef?.get()
+                        callback?.didUpdateLocation(location)
+                    }
+                }
             }
         }
         locationClient.requestLocationUpdates(locationRequest, locationCallback, null)
@@ -142,5 +138,31 @@ class LocationObserver constructor(var context: Context, var activity: Activity)
 
         // 更新終了する場合
         locationClient.removeLocationUpdates(locationCallback)
+    }
+
+    fun showSnackBar(activity: Activity, message: String, closure:()->Unit) {
+
+        Logging.d("")
+
+        val rootLayout: View = activity.findViewById(android.R.id.content)
+        val snackbar = Snackbar.make(rootLayout, message, Snackbar.LENGTH_INDEFINITE)
+        snackbar.setAction("OK") {
+            Logging.d("closure")
+            closure()
+        }
+        snackbar.view.setBackgroundColor(Color.GRAY)
+        val snackTextView: TextView = snackbar.view.findViewById(com.google.android.material.R.id.snackbar_text)
+        snackTextView.setTextColor(Color.WHITE)
+        snackTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18.0f)
+        snackTextView.setMaxLines(20)
+        val snackActionView: Button = snackbar.view.findViewById(com.google.android.material.R.id.snackbar_action)
+        snackActionView.setBackgroundColor(Color.BLACK)
+        snackActionView.setTextColor(Color.WHITE)
+        snackActionView.setHeight(50)
+        val view = snackbar.view
+        val params = view.layoutParams as FrameLayout.LayoutParams
+        params.gravity = Gravity.TOP
+        view.layoutParams = params
+        snackbar.show()
     }
 }
