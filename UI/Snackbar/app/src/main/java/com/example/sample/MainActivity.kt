@@ -15,6 +15,7 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintLayout.TEXT_ALIGNMENT_CENTER
 import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
@@ -72,17 +73,28 @@ class MainActivity : AppCompatActivity() {
     fun generateSnackBar(): Snackbar {
 
         val rootLayout: View = findViewById(android.R.id.content)
-        val snackbar = Snackbar.make(rootLayout, "テストです", Snackbar.LENGTH_INDEFINITE)
-        snackbar.setAction("Click") {
+
+        val message = "吾輩わがはいは猫である。名前はまだ無い。どこで生れたかとんと見当けんとうがつかぬ。何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。吾輩はここで始めて人間というものを見た。"
+        val snackbar = Snackbar.make(rootLayout, message, Snackbar.LENGTH_INDEFINITE)
+        snackbar.setAction("CLOSE") {
             snackbar.dismiss()
         }
         snackbar.view.setBackgroundColor(Color.GRAY)
+
+        // テキスト
         val snackTextView: TextView = snackbar.view.findViewById(com.google.android.material.R.id.snackbar_text)
         snackTextView.setTextColor(Color.WHITE)
-        snackTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20.0f)
+        snackTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18.0f)
+        snackTextView.setMaxLines(20)
+        //snackTextView.setLines(10)
+        //snackTextView.setHeight(450)
+
+        // ボタン
         val snackActionView: Button = snackbar.view.findViewById(com.google.android.material.R.id.snackbar_action)
         snackActionView.setBackgroundColor(Color.BLACK)
-        snackActionView.setTextColor(Color.RED)
+        snackActionView.setTextColor(Color.WHITE)
+        snackActionView.setHeight(50)
+
         return snackbar
     }
 
