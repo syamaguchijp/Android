@@ -6,12 +6,14 @@ import android.content.Intent
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofenceStatusCodes
 import com.google.android.gms.location.GeofencingEvent
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
 
-        Logging.d("")
+        Logging.d("####### " + currentDateTime())
 
         intent?.let { context?.let {
             val geofencingEvent = GeofencingEvent.fromIntent(intent)?: return
@@ -59,4 +61,12 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         val lnm = LocalNotificationManager()
         lnm.sendNotification(context, "テスト", message, 12345, "NOTIFICATION_LOCAL")
     }
+
+    private fun currentDateTime(): String {
+
+        val currentDateTime = LocalDateTime.now()
+        val formatta = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
+        return formatta.format(currentDateTime)
+    }
+
 }

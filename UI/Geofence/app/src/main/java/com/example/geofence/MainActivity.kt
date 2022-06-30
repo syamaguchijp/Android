@@ -1,49 +1,39 @@
 package com.example.geofence
 
 import android.content.pm.PackageManager
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.method.ScrollingMovementMethod
+import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var locationObserver: LocationObserver
+    private lateinit var textView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        Logging.context = applicationContext
+        textView = findViewById(R.id.my_log_textview)
+        textView.setMovementMethod(ScrollingMovementMethod())
+
+        //Logging.deleteFile()
+
         locationObserver = LocationObserver(applicationContext, this)
         locationObserver.start()
     }
-/*
-    // locationObserverで実行した権限許諾に関する結果がコールバックされる
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>,
-                                            grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        Logging.d("")
-
-        if (requestCode != LocationObserver.REQUEST_PERMISSION) {
-            Logging.d("return")
-            return
-        }
-        locationObserver.reactRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
-*/
     override fun onResume() {
 
-        Logging.d("")
-
         super.onResume()
-    }
 
-    override fun onPause() {
-
-        Logging.d("")
-
-        super.onPause()
+        val str = Logging.readFile()
+        textView.setText(str)
     }
 }

@@ -1,8 +1,6 @@
 package com.example.geofence
 
-import android.Manifest
 import android.Manifest.permission.*
-import android.R
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.Context
@@ -24,18 +22,15 @@ import com.google.android.gms.location.Geofence.NEVER_EXPIRE
 import com.google.android.material.snackbar.Snackbar
 
 
-class LocationObserver constructor(var context: Context, var activity: AppCompatActivity) {
+class LocationObserver constructor(
+    private var context: Context, private var activity: AppCompatActivity) {
 
     private val GeofenceId = "A1000"
-    private val GeofenceLatitude = 35.79309815333721
-    private val GeofenceLongitude = 139.4694900165554
+    private val GeofenceLatitude = 35.72941729944574
+    private val GeofenceLongitude = 139.71046754987373
     private val GeofenceRadius = 100.0f // m
 
     private var geofencingClient: GeofencingClient
-
-    companion object {
-        val REQUEST_PERMISSION = 10
-    }
 
     init {
         Logging.d("")
@@ -51,60 +46,49 @@ class LocationObserver constructor(var context: Context, var activity: AppCompat
 
     //region 許諾
 
-    // 位置情報の権限の確認
-    fun checkPermission() {
+
+    // 開始する前に、位置情報権限を確認する
+    private fun checkPermission() {
 
         Logging.d("")
 
-        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-                    ActivityCompat.checkSelfPermission(context, ACCESS_BACKGROUND_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED)
-            // Android10 では、常に許可でないと、ジオフェンスの登録に失敗するようだ
-            ||
-            (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                    ActivityCompat.checkSelfPermission(context, ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED)
-            // Android6 以上は、パーミッション確認が必要
-            // Android10 では、常に許可、かつ、正確な位置情報でないと、ジオフェンス登録に失敗するようだ
-            ) {
-            requestLocationPermission()
-
-        } else {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             startGeofence()
+            return
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+            ActivityCompat.checkSelfPermission(context, ACCESS_BACKGROUND_LOCATION)
+            == PackageManager.PERMISSION_GRANTED) {
+            // Android10 では、常に許可でないと、ジオフェンスの登録に失敗する
+            startGeofence()
+            return
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q &&
+            ActivityCompat.checkSelfPermission(context, ACCESS_FINE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED) {
+            // 「正確な位置情報」でないと、ジオフェンスの登録に失敗する
+            startGeofence()
+            return
+        }
+
+        checkPermissionRationale()
     }
 
-    // 位置情報の権限の許諾を求める。
-    // ContextCompat.checkSelfPermission() メソッドが PERMISSION_DENIED を返した場合は、
-    // shouldShowRequestPermissionRationale() を呼び出します。
-    // このメソッドが true を返した場合は、ユーザーに説明 UI を表示します。
-    // この UI で、ユーザーが有効にしようとしている機能が特定の権限を必要とする理由を説明します。
-    private fun requestLocationPermission() {
+    // PermissionRationaleをチェックする
+    private fun checkPermissionRationale() {
 
         Logging.d("")
 
-        // shouldShowRequestPermissionRationaleメソッドは、
-        // 一度拒否されて「今後表示しない」が選択されてないならtrueを返却する。
-        //（必ずしもtrueが返却されるわけではなく、時間的間隔などの要素もあるようだ）
-        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-                    ActivityCompat.shouldShowRequestPermissionRationale(
-                        activity, Manifest.permission.ACCESS_BACKGROUND_LOCATION))
-            ||
-            (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                    ActivityCompat.shouldShowRequestPermissionRationale(
-                    activity, Manifest.permission.ACCESS_FINE_LOCATION)))
-        {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(
+                activity, ACCESS_FINE_LOCATION)) {
             // 以前許諾を拒否された場合などの再表示が必要なときにコールされ、ここでアプリが権限を必要とする理由を説明する
             Logging.d("shouldShowRequestPermissionRationale")
-
             showSnackBar(activity, "ジオフェンス利用のため、位置情報許諾を「常に許可」「正確な位置情報」にしてください。", {
-                requestPermissionFineLocation()
-                //startActivity(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                requestPermissions()
             })
-
         } else {
             Logging.d("else")
-            requestPermissionFineLocation()
+            requestPermissions()
         }
     }
 
@@ -112,22 +96,21 @@ class LocationObserver constructor(var context: Context, var activity: AppCompat
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         when {
-            permissions.getOrDefault(Manifest.permission.ACCESS_BACKGROUND_LOCATION, false) -> {
+            permissions.getOrDefault(ACCESS_BACKGROUND_LOCATION, false) -> {
                 Logging.d("ACCESS_BACKGROUND_LOCATION granted")
+                startGeofence()
             }
-            permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
+            permissions.getOrDefault(ACCESS_FINE_LOCATION, false) -> {
                 Logging.d("ACCESS_COARSE_LOCATION granted")
-            }
-            permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                Logging.d("ACCESS_COARSE_LOCATION granted")
+                startGeofence()
             }
             else -> {
-                Logging.d("else")
+                Logging.d("not granted, so return")
             }
         }
     }
 
-    private fun requestPermissionFineLocation() {
+    private fun requestPermissions() {
 
         Logging.d("")
 
@@ -136,78 +119,29 @@ class LocationObserver constructor(var context: Context, var activity: AppCompat
 
     private fun requestArray(): Array<String> {
 
-        var ary = arrayOf(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Android10からは、常に許可を求める場合は、ACCESS_BACKGROUND_LOCATIONが必要。
+            // targetSdkVersion30以上でFINE_LOCATIONとBACKGROUND_LOCATIONを同時にリクエストするとクラッシュする?
+            return arrayOf(ACCESS_BACKGROUND_LOCATION)
+        }
+        return arrayOf(
             ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION,
         )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // Android10からは、常に許可を求める場合は、ACCESS_BACKGROUND_LOCATIONも必要
-            ary += ACCESS_BACKGROUND_LOCATION
-        }
-        return ary
     }
 
-
-    /*
-    private fun requestPermissionFineLocation() {
-
-        Logging.d("")
-
-        var requestArray = arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-        )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // Android10からは、常に許可を求める場合は、ACCESS_BACKGROUND_LOCATIONも必要
-            requestArray += Manifest.permission.ACCESS_BACKGROUND_LOCATION
-        }
-        ActivityCompat.requestPermissions(
-            activity, requestArray, REQUEST_PERMISSION
-        )
-    }
-
-
-
-    // 許諾ダイアログに対する応答時に、呼び出し元のonRequestPermissionsResultコール時に呼ばれる
-    fun reactRequestPermissionsResult(requestCode: Int, permissions: Array<String?>,
-                                      grantResults: IntArray) {
-
-        Logging.d("")
-
-        if (requestCode != REQUEST_PERMISSION) {
-            Logging.d("return")
-            return
-        }
-        if (grantResults.size == 0) {
-            return
-        }
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Logging.d("PERMISSION_GRANTED")
-            // ジオフェンスを開始する
-            startGeofence()
-        } else {
-            Logging.d("PERMISSION_DENIED")
-        }
-    }
- */
     //endregion
 
     //region ジオフェンス
 
-    fun startGeofence() {
+    // ジオフェンスを開始する。
+    // 位置情報権限が「常に許可」かつ「位置情報」でないと、addOnFailureListenerがコールされて失敗する。
+    private fun startGeofence() {
 
         Logging.d("")
 
-        var geofenceList = makeGeofenceList()
-
+        val geofenceList = makeGeofenceList()
         val request = getGeofencingRequest(geofenceList)
-        val pendingIntent = getPendingIntent()
-        if (ActivityCompat.checkSelfPermission(
-                activity, Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            Logging.d("return")
-            return
-        }
-        geofencingClient.addGeofences(request, pendingIntent).run {
+        geofencingClient.addGeofences(request, getPendingIntent()).run {
             addOnSuccessListener {
                 Logging.d("add success")
             }
@@ -221,7 +155,7 @@ class LocationObserver constructor(var context: Context, var activity: AppCompat
 
         Logging.d("")
 
-        var geofenceList = mutableListOf<Geofence>()
+        val geofenceList = mutableListOf<Geofence>()
         geofenceList.add(
             Geofence.Builder()
                 .setRequestId(GeofenceId)
@@ -231,7 +165,8 @@ class LocationObserver constructor(var context: Context, var activity: AppCompat
                     GeofenceRadius
                 )
                 .setExpirationDuration(NEVER_EXPIRE)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or
+                        Geofence.GEOFENCE_TRANSITION_EXIT)
                 .build()
         )
         return geofenceList
@@ -242,9 +177,7 @@ class LocationObserver constructor(var context: Context, var activity: AppCompat
         Logging.d("")
 
         return GeofencingRequest.Builder().apply {
-            // 多くのケースでは、 INITIAL_TRIGGER_DWELL の使用をおすすめします。
-            // そうすると、定義された期間が経過するまでユーザーがジオフェンス内にとどまったときに限り、イベントがトリガーされます
-            setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+            setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_DWELL)
             addGeofences(geofenceList)
         }.build()
     }
@@ -254,8 +187,12 @@ class LocationObserver constructor(var context: Context, var activity: AppCompat
         Logging.d("")
 
         val intent = Intent(activity, GeofenceBroadcastReceiver::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            return PendingIntent.getBroadcast(activity, 0, intent,
+                PendingIntent.FLAG_MUTABLE)
+        }
         return PendingIntent.getBroadcast(activity, 0, intent,
-            PendingIntent.FLAG_IMMUTABLE)
+            PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
     fun stopGeofence() {
@@ -264,10 +201,10 @@ class LocationObserver constructor(var context: Context, var activity: AppCompat
 
         geofencingClient.removeGeofences(getPendingIntent()).run {
             addOnSuccessListener {
-                Logging.d("")
+                Logging.d("remove geofences success")
             }
             addOnFailureListener {
-                Logging.d("")
+                Logging.d("remove geofences fail")
             }
         }
     }
@@ -275,7 +212,7 @@ class LocationObserver constructor(var context: Context, var activity: AppCompat
     //endregion
 
 
-    fun showSnackBar(activity: Activity, message: String, closure:()->Unit) {
+    private fun showSnackBar(activity: Activity, message: String, closure:()->Unit) {
 
         Logging.d("")
 

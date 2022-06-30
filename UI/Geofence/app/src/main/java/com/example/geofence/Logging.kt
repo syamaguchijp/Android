@@ -13,45 +13,45 @@ class Logging {
         private val DEBUG = true
         private val TAG = "Sample"
 
-        private val WRITE_FILE = false
+        private val WRITE_FILE = true
         private val FILE_NAME = "logger.txt"
 
         fun v(message: String?) {
             if (DEBUG) {
-                val msg = message ?: ""
-                Log.v(TAG, getMeta() + msg)
+                val msg = getMeta() +  message ?: ""
+                Log.v(TAG, msg)
                 writeFile(msg)
             }
         }
 
         fun d(message: String?) {
             if (DEBUG) {
-                val msg = message ?: ""
-                Log.d(TAG, getMeta() + msg)
+                val msg = getMeta() +  message ?: ""
+                Log.d(TAG, msg)
                 writeFile(msg)
             }
         }
 
         fun i(message: String?) {
             if (DEBUG) {
-                val msg = message ?: ""
-                Log.i(TAG, getMeta() + msg)
+                val msg = getMeta() +  message ?: ""
+                Log.i(TAG, msg)
                 writeFile(msg)
             }
         }
 
         fun w(message: String?) {
             if (DEBUG) {
-                val msg = message ?: ""
-                Log.w(TAG, getMeta() + msg)
+                val msg = getMeta() +  message ?: ""
+                Log.w(TAG, msg)
                 writeFile(msg)
             }
         }
 
         fun e(message: String?) {
             if (DEBUG) {
-                val msg = message ?: ""
-                Log.e(TAG, getMeta() + msg)
+                val msg = getMeta() +  message ?: ""
+                Log.e(TAG, msg)
                 writeFile(msg)
             }
         }
@@ -73,19 +73,27 @@ class Logging {
                 return
             }
             context?.let {
-                File(it.filesDir, FILE_NAME).writer().use {
-                    it.write(message)
-                }
+                File(it.filesDir, FILE_NAME).appendText(message + "\n")
             }
         }
 
-        private fun deleteFile() {
+        fun deleteFile() {
             context?.let {
                 val readFile = File(it.filesDir, FILE_NAME)
                 if (readFile.exists()) {
                     readFile.delete()
                 }
             }
+        }
+
+        fun readFile():String  {
+            context?.let {
+                val readFile = File(it.filesDir, FILE_NAME)
+                if (readFile.exists()) {
+                    return readFile.readText()
+                }
+            }
+            return ""
         }
 
         //endregion
