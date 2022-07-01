@@ -13,7 +13,7 @@ import java.lang.ref.WeakReference
 
 class MainActivity : AppCompatActivity(), LocationObserverCallback {
 
-    lateinit var locationObserver: LocationObserver
+    private lateinit var locationObserver: LocationObserver
 
     override fun onCreate(savedInstanceState: Bundle?) {
 

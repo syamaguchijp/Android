@@ -35,10 +35,6 @@ class LocationObserver constructor(var context: Context, var activity: AppCompat
     private val locationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
 
-    companion object {
-        val REQUEST_PERMISSION = 10
-    }
-
     init {
         Logging.d("")
         locationClient = FusedLocationProviderClient(context)
