@@ -79,7 +79,11 @@ class LocationObserver constructor(
         Logging.d("")
 
         if (ActivityCompat.shouldShowRequestPermissionRationale(
-                activity, ACCESS_FINE_LOCATION)) {
+                activity, ACCESS_FINE_LOCATION) ||
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                activity, ACCESS_COARSE_LOCATION) ||
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                activity, ACCESS_BACKGROUND_LOCATION)) {
             // 以前許諾を拒否された場合などの再表示が必要なときにコールされ、ここでアプリが権限を必要とする理由を説明する
             Logging.d("shouldShowRequestPermissionRationale")
             val msg = "ジオフェンス利用のため、位置情報許諾を「常に許可」「正確な位置情報」にしてください。"

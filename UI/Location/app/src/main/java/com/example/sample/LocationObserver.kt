@@ -71,7 +71,9 @@ class LocationObserver constructor(private var context: Context, private var act
         Logging.d("")
 
         if (ActivityCompat.shouldShowRequestPermissionRationale(
-                activity, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                activity, Manifest.permission.ACCESS_FINE_LOCATION) ||
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                activity, Manifest.permission.ACCESS_COARSE_LOCATION)) {
             // 以前許諾を拒否された場合などの再表示が必要なときにコールされ、ここでアプリが権限を必要とする理由を説明する
             Logging.d("shouldShowRequestPermissionRationale")
             val msg = "XXXXXXの理由により位置情報を取得します。"
@@ -108,10 +110,9 @@ class LocationObserver constructor(private var context: Context, private var act
 
     private fun requestArray(): Array<String> {
 
-        val ary = arrayOf(
+        return arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
         )
-        return ary
     }
 
     //endregion
