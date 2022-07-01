@@ -26,8 +26,8 @@ class LocationObserver constructor(
     private var context: Context, private var activity: AppCompatActivity) {
 
     private val GeofenceId = "A1000"
-    private val GeofenceLatitude = 35.72941729944574
-    private val GeofenceLongitude = 139.71046754987373
+    private val GeofenceLatitude = 35.72895914395796
+    private val GeofenceLongitude = 139.7105163770693
     private val GeofenceRadius = 100.0f // m
 
     private var geofencingClient: GeofencingClient
@@ -45,7 +45,6 @@ class LocationObserver constructor(
     }
 
     //region 許諾
-
 
     // 開始する前に、位置情報権限を確認する
     private fun checkPermission() {
@@ -83,9 +82,10 @@ class LocationObserver constructor(
                 activity, ACCESS_FINE_LOCATION)) {
             // 以前許諾を拒否された場合などの再表示が必要なときにコールされ、ここでアプリが権限を必要とする理由を説明する
             Logging.d("shouldShowRequestPermissionRationale")
-            showSnackBar(activity, "ジオフェンス利用のため、位置情報許諾を「常に許可」「正確な位置情報」にしてください。", {
+            val msg = "ジオフェンス利用のため、位置情報許諾を「常に許可」「正確な位置情報」にしてください。"
+            showSnackBar(activity, msg) {
                 requestPermissions()
-            })
+            }
         } else {
             Logging.d("else")
             requestPermissions()
@@ -95,18 +95,15 @@ class LocationObserver constructor(
     private val permissionLauncher = activity.registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        when {
-            permissions.getOrDefault(ACCESS_BACKGROUND_LOCATION, false) -> {
-                Logging.d("ACCESS_BACKGROUND_LOCATION granted")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (permissions.getOrDefault(ACCESS_BACKGROUND_LOCATION, false) ||
+                permissions.getOrDefault(ACCESS_FINE_LOCATION, false)) {
                 startGeofence()
-            }
-            permissions.getOrDefault(ACCESS_FINE_LOCATION, false) -> {
-                Logging.d("ACCESS_COARSE_LOCATION granted")
-                startGeofence()
-            }
-            else -> {
+            } else {
                 Logging.d("not granted, so return")
             }
+        } else {
+            startGeofence()
         }
     }
 
