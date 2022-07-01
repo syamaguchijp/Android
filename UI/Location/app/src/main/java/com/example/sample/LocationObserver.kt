@@ -17,10 +17,7 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.*
 import com.google.android.material.snackbar.Snackbar
 import java.lang.ref.WeakReference
 
@@ -28,7 +25,7 @@ interface LocationObserverCallback {
     fun didUpdateLocation(location: Location)
 }
 
-class LocationObserver constructor(var context: Context, var activity: AppCompatActivity) {
+class LocationObserver constructor(private var context: Context, private var activity: AppCompatActivity) {
 
     var callbackRef: WeakReference<LocationObserverCallback>? = null // 弱参照
 
@@ -50,7 +47,7 @@ class LocationObserver constructor(var context: Context, var activity: AppCompat
     //region 許諾
 
     // 位置情報の権限の確認
-    fun checkPermission() {
+    private fun checkPermission() {
 
         Logging.d("")
 
@@ -77,9 +74,10 @@ class LocationObserver constructor(var context: Context, var activity: AppCompat
                 activity, Manifest.permission.ACCESS_FINE_LOCATION)) {
             // 以前許諾を拒否された場合などの再表示が必要なときにコールされ、ここでアプリが権限を必要とする理由を説明する
             Logging.d("shouldShowRequestPermissionRationale")
-            showSnackBar(activity, "XXXXXXの理由により位置情報を取得します。", {
+            val msg = "XXXXXXの理由により位置情報を取得します。"
+            showSnackBar(activity, msg) {
                 requestPermissions()
-            })
+            }
         } else {
             Logging.d("else")
             requestPermissions()
@@ -89,18 +87,15 @@ class LocationObserver constructor(var context: Context, var activity: AppCompat
     private val permissionLauncher = activity.registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        when {
-            permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                Logging.d("ACCESS_FINE_LOCATION granted")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) ||
+                permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)) {
                 startLocation()
+            } else {
+                Logging.d("not granted, so return")
             }
-            permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                Logging.d("ACCESS_COARSE_LOCATION granted")
-                startLocation()
-            }
-            else -> {
-                Logging.d("not granted, so return.")
-            }
+        } else {
+            startLocation()
         }
     }
 
@@ -113,7 +108,7 @@ class LocationObserver constructor(var context: Context, var activity: AppCompat
 
     private fun requestArray(): Array<String> {
 
-        var ary = arrayOf(
+        val ary = arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
         )
         return ary
@@ -133,17 +128,15 @@ class LocationObserver constructor(var context: Context, var activity: AppCompat
 
         // 位置情報の更新を受け取る
         val locationRequest = LocationRequest.create().setPriority(
-            LocationRequest.PRIORITY_HIGH_ACCURACY)
+            Priority.PRIORITY_HIGH_ACCURACY)
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
-                locationResult?.let {
-                    val location = it.lastLocation
-                    location?.let {
-                        Logging.d("onLocationResult ${location.latitude} ${location.longitude}")
-                        val callback = callbackRef?.get()
-                        callback?.didUpdateLocation(location)
-                    }
+                val location = locationResult.lastLocation
+                location?.let {
+                    Logging.d("onLocationResult ${location.latitude} ${location.longitude}")
+                    val callback = callbackRef?.get()
+                    callback?.didUpdateLocation(location)
                 }
             }
         }
