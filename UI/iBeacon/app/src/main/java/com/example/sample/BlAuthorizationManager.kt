@@ -10,8 +10,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -23,20 +21,27 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.material.snackbar.Snackbar
 
+typealias BlAuthorizationCompletionClosure = (isSuccess: Boolean, result: BlAuthorizationResult) -> Unit
 
-class IBeaconObserver constructor(
+enum class BlAuthorizationResult {
+    SUCCESS,
+    SYSTEM_FAILURE,
+    BLUETOOTH_OFF,
+    PERMISSION_DENIED
+}
+
+class BlAuthorizationManager constructor(
     private var context: Context, private var activity: AppCompatActivity) {
 
-    private val SCAN_PERIOD: Long = 10000
+    private var completion: BlAuthorizationCompletionClosure? = null
 
-    private var mScanning: Boolean = false
-    private var handler = Handler(Looper.getMainLooper())
-
-    fun start() {
+    fun start(completion: BlAuthorizationCompletionClosure) {
 
         Logging.d("")
 
+        this.completion = completion
         if (!hasSystemFeatureBluetooth()) {
+            completion(false, BlAuthorizationResult.SYSTEM_FAILURE)
             return
         }
         checkBtOnOff()
@@ -79,6 +84,8 @@ class IBeaconObserver constructor(
         if (result.resultCode == Activity.RESULT_OK) {
             Logging.d("RESULT_OK")
             requestBtPermission()
+        } else {
+            this?.completion?.invoke(false, BlAuthorizationResult.BLUETOOTH_OFF)
         }
     }
 
@@ -95,6 +102,7 @@ class IBeaconObserver constructor(
                 checkLocationPermission()
             } else {
                 Logging.d("not granted, so return")
+                completion?.let { it(false, BlAuthorizationResult.PERMISSION_DENIED) }
             }
         } else {
             checkLocationPermission()
@@ -119,7 +127,7 @@ class IBeaconObserver constructor(
         Logging.d("")
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            startScan()
+            completion?.let { it(false, BlAuthorizationResult.SUCCESS) }
             return
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
@@ -128,13 +136,13 @@ class IBeaconObserver constructor(
             )
             == PackageManager.PERMISSION_GRANTED) {
             Logging.d("ACCESS_BACKGROUND_LOCATION")
-            startScan()
+            completion?.let { it(true, BlAuthorizationResult.SUCCESS) }
             return
         }
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
             == PackageManager.PERMISSION_GRANTED) {
             Logging.d("ACCESS_FINE_LOCATION")
-            startScan()
+            completion?.let { it(true, BlAuthorizationResult.SUCCESS) }
             return
         }
 
@@ -173,12 +181,13 @@ class IBeaconObserver constructor(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             if (permissions.getOrDefault(Manifest.permission.ACCESS_BACKGROUND_LOCATION, false) ||
                 permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false)) {
-                startScan()
+                completion?.let { it(true, BlAuthorizationResult.SUCCESS) }
             } else {
                 Logging.d("not granted, so return")
+                completion?.let { it(false, BlAuthorizationResult.PERMISSION_DENIED) }
             }
         } else {
-            startScan()
+            completion?.let { it(true, BlAuthorizationResult.SUCCESS) }
         }
     }
 
@@ -202,57 +211,6 @@ class IBeaconObserver constructor(
     }
 
     //endregion
-
-    //region iBeacon検知
-
-    private fun startScan() {
-
-        Logging.d("")
-
-        scanLeDevice(true)
-    }
-
-    private fun scanLeDevice(enable: Boolean) {
-
-        Logging.d("enable=${enable}")
-
-        when (enable) {
-            true -> {
-                // Stops scanning after a pre-defined scan period.
-                handler.postDelayed({
-                    mScanning = false
-                    bluetoothAdapter?.stopLeScan(leScanCallback)
-                }, SCAN_PERIOD)
-                mScanning = true
-                bluetoothAdapter?.startLeScan(leScanCallback)
-            }
-            else -> {
-                mScanning = false
-                bluetoothAdapter?.stopLeScan(leScanCallback)
-            }
-        }
-    }
-
-    private val leScanCallback = BluetoothAdapter.LeScanCallback { device, rssi, scanRecord ->
-        activity.runOnUiThread {
-            val iBeacon = IBeacon(scanRecord, rssi)
-            iBeacon.uuid?.let {
-                Logging.d(
-                    "leScanCallback ${it} ${iBeacon.major} ${iBeacon.minor} ${rssi}"
-                )
-            }
-        }
-    }
-
-    fun stopScan() {
-
-        Logging.d("")
-
-        scanLeDevice(false)
-    }
-
-    //endregion
-
 
     private fun showSnackBar(activity: Activity, message: String, closure:()->Unit) {
 

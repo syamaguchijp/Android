@@ -5,7 +5,8 @@ import android.os.Bundle
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var iBeaconObserver: IBeaconObserver
+    private lateinit var blAuthorizationManager: BlAuthorizationManager
+    private lateinit var blScanManager: BlScanManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -14,8 +15,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        iBeaconObserver = IBeaconObserver(applicationContext, this)
-        iBeaconObserver.start()
+        blAuthorizationManager = BlAuthorizationManager(applicationContext, this)
+        blAuthorizationManager.start({ isSuccess: Boolean, result: BlAuthorizationResult ->
+            print("complete!!! ${isSuccess}")
+            if (isSuccess) {
+                blScanManager = BlScanManager(applicationContext)
+                blScanManager.startScan()
+            }
+        })
     }
 
 }
