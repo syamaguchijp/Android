@@ -1,19 +1,10 @@
 package com.example.sample
 
-import android.Manifest
-import android.app.Activity
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.content.pm.PackageManager
-import android.location.Location
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
-import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
+import androidx.appcompat.app.AppCompatActivity
 import java.lang.ref.WeakReference
 
 interface WifiObserverCallback {
@@ -21,14 +12,9 @@ interface WifiObserverCallback {
     fun didGetCurrentWifi(wifi: WifiInfo?)
 }
 
-class WifiObserver constructor(var context: Context, var activity: Activity) {
+class WifiObserver constructor(var context: Context, var activity: AppCompatActivity) {
 
     var callbackRef: WeakReference<WifiObserverCallback>? = null // 弱参照
-
-    companion object {
-        val PERMISSIONS_REQUEST_CODE = 10
-    }
-
     var wifiManager: WifiManager
 
     init {
@@ -36,41 +22,20 @@ class WifiObserver constructor(var context: Context, var activity: Activity) {
         wifiManager = activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
     }
 
-    fun checkPermission() {
+    fun start() {
 
         Logging.d("")
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-            (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) !=
-                    PackageManager.PERMISSION_GRANTED ||
-                    ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) !=
-                    PackageManager.PERMISSION_GRANTED ||
-                    ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_WIFI_STATE) !=
-                    PackageManager.PERMISSION_GRANTED ||
-                    ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_NETWORK_STATE) !=
-                    PackageManager.PERMISSION_GRANTED)
-        ){
-            requestPermission()
-
-        } else {
-            startScan()
-        }
+        // 位置情報の権限認証を経てから、ビーコンスキャンのアラームを開始する
+        val authorizationController = AuthorizationChecker(context, activity)
+        authorizationController.start({ result: AuthorizationResult ->
+            print("complete!!!")
+            if (result == AuthorizationResult.SUCCESS) {
+                startScan()
+            }
+        })
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun requestPermission() {
-
-        Logging.d("")
-
-        activity.requestPermissions(
-            arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_WIFI_STATE,
-                Manifest.permission.ACCESS_NETWORK_STATE),
-            PERMISSIONS_REQUEST_CODE)
-    }
-
-    fun startScan() {
+    private fun startScan() {
 
         Logging.d("")
 
@@ -110,6 +75,8 @@ class WifiObserver constructor(var context: Context, var activity: Activity) {
     }
 
     private fun retrieveCurrentWifi() {
+
+        Logging.d("")
 
         val callback = callbackRef?.get()
         val currentWifi = wifiManager?.connectionInfo
