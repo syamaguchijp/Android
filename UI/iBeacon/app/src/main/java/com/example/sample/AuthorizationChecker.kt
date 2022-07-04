@@ -21,27 +21,27 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.material.snackbar.Snackbar
 
-typealias BlAuthorizationCompletionClosure = (isSuccess: Boolean, result: BlAuthorizationResult) -> Unit
+typealias AuthorizationCheckClosure = (result: AuthorizationResult) -> Unit
 
-enum class BlAuthorizationResult {
+enum class AuthorizationResult {
     SUCCESS,
     SYSTEM_FAILURE,
     BLUETOOTH_OFF,
     PERMISSION_DENIED
 }
 
-class BlAuthorizationManager constructor(
+class AuthorizationChecker constructor(
     private var context: Context, private var activity: AppCompatActivity) {
 
-    private var completion: BlAuthorizationCompletionClosure? = null
+    private var completion: AuthorizationCheckClosure? = null
 
-    fun start(completion: BlAuthorizationCompletionClosure) {
+    fun start(completion: AuthorizationCheckClosure) {
 
         Logging.d("")
 
         this.completion = completion
         if (!hasSystemFeatureBluetooth()) {
-            completion(false, BlAuthorizationResult.SYSTEM_FAILURE)
+            completion( AuthorizationResult.SYSTEM_FAILURE)
             return
         }
         checkBtOnOff()
@@ -85,7 +85,7 @@ class BlAuthorizationManager constructor(
             Logging.d("RESULT_OK")
             requestBtPermission()
         } else {
-            this?.completion?.invoke(false, BlAuthorizationResult.BLUETOOTH_OFF)
+            this?.completion?.invoke(AuthorizationResult.BLUETOOTH_OFF)
         }
     }
 
@@ -102,7 +102,7 @@ class BlAuthorizationManager constructor(
                 checkLocationPermission()
             } else {
                 Logging.d("not granted, so return")
-                completion?.let { it(false, BlAuthorizationResult.PERMISSION_DENIED) }
+                completion?.let { it(AuthorizationResult.PERMISSION_DENIED) }
             }
         } else {
             checkLocationPermission()
@@ -127,7 +127,7 @@ class BlAuthorizationManager constructor(
         Logging.d("")
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            completion?.let { it(false, BlAuthorizationResult.SUCCESS) }
+            completion?.let { it(AuthorizationResult.SUCCESS) }
             return
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
@@ -136,13 +136,13 @@ class BlAuthorizationManager constructor(
             )
             == PackageManager.PERMISSION_GRANTED) {
             Logging.d("ACCESS_BACKGROUND_LOCATION")
-            completion?.let { it(true, BlAuthorizationResult.SUCCESS) }
+            completion?.let { it(AuthorizationResult.SUCCESS) }
             return
         }
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
             == PackageManager.PERMISSION_GRANTED) {
             Logging.d("ACCESS_FINE_LOCATION")
-            completion?.let { it(true, BlAuthorizationResult.SUCCESS) }
+            completion?.let { it(AuthorizationResult.SUCCESS) }
             return
         }
 
@@ -181,13 +181,13 @@ class BlAuthorizationManager constructor(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             if (permissions.getOrDefault(Manifest.permission.ACCESS_BACKGROUND_LOCATION, false) ||
                 permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false)) {
-                completion?.let { it(true, BlAuthorizationResult.SUCCESS) }
+                completion?.let { it(AuthorizationResult.SUCCESS) }
             } else {
                 Logging.d("not granted, so return")
-                completion?.let { it(false, BlAuthorizationResult.PERMISSION_DENIED) }
+                completion?.let { it(AuthorizationResult.PERMISSION_DENIED) }
             }
         } else {
-            completion?.let { it(true, BlAuthorizationResult.SUCCESS) }
+            completion?.let { it(AuthorizationResult.SUCCESS) }
         }
     }
 
