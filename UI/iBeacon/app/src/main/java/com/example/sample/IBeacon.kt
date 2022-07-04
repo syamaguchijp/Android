@@ -5,9 +5,9 @@ import java.util.*
 class IBeacon constructor(
     private var scanRecord: ByteArray, var rssi: Int) {
 
-    var uuid: String?
-    var major: String?
-    var minor: String?
+    var uuid: String
+    var major: String
+    var minor: String
 
     init {
         uuid = convertUUID(scanRecord)
@@ -15,7 +15,7 @@ class IBeacon constructor(
         minor = convertMinor(scanRecord)
     }
 
-    private fun convertUUID(scanRecord: ByteArray): String? {
+    private fun convertUUID(scanRecord: ByteArray): String {
 
         return (IntToHex2(scanRecord[9].toInt() and 0xff)
                 + IntToHex2(scanRecord[10].toInt() and 0xff)
@@ -39,14 +39,14 @@ class IBeacon constructor(
                 + IntToHex2(scanRecord[24].toInt() and 0xff))
     }
 
-    private fun convertMajor(scanRecord: ByteArray): String? {
+    private fun convertMajor(scanRecord: ByteArray): String {
 
         val hexMajor = IntToHex2(scanRecord[25].toInt() and 0xff) +
                 IntToHex2(scanRecord[26].toInt() and 0xff)
         return hexMajor.toInt(16).toString()
     }
 
-    private fun convertMinor(scanRecord: ByteArray): String? {
+    private fun convertMinor(scanRecord: ByteArray): String {
 
         val hexMinor = IntToHex2(scanRecord[27].toInt() and 0xff) +
                 IntToHex2(scanRecord[28].toInt() and 0xff)

@@ -6,7 +6,6 @@ import android.os.Bundle
 class MainActivity : AppCompatActivity() {
 
     private lateinit var blAuthorizationManager: BlAuthorizationManager
-    private lateinit var blScanManager: BlScanManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -15,12 +14,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Bluetoothの権限認証を経てから、ビーコンスキャンのアラームを開始する
         blAuthorizationManager = BlAuthorizationManager(applicationContext, this)
         blAuthorizationManager.start({ isSuccess: Boolean, result: BlAuthorizationResult ->
             print("complete!!! ${isSuccess}")
             if (isSuccess) {
-                blScanManager = BlScanManager(applicationContext)
-                blScanManager.startScan()
+                AlarmController.fire(applicationContext)
             }
         })
     }

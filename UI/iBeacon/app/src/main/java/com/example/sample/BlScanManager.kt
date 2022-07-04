@@ -6,10 +6,12 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 
-class BlScanManager constructor(
-    private var context: Context) {
+typealias BlScanManagerCallback = (iBeacon: IBeacon) -> Unit
 
-    private val SCAN_PERIOD: Long = 10000
+class BlScanManager constructor(
+    private var context: Context, private var callback: BlScanManagerCallback) {
+
+    private val SCAN_PERIOD_SEC: Long = 10 // 秒
     private var mScanning: Boolean = false
     private var handler = Handler(Looper.getMainLooper())
 
@@ -36,7 +38,6 @@ class BlScanManager constructor(
         scanLeDevice(false)
     }
 
-
     private fun scanLeDevice(enable: Boolean) {
 
         Logging.d("enable=${enable}")
@@ -47,7 +48,7 @@ class BlScanManager constructor(
                 handler.postDelayed({
                     mScanning = false
                     bluetoothAdapter?.stopLeScan(leScanCallback)
-                }, SCAN_PERIOD)
+                }, SCAN_PERIOD_SEC * 1000)
                 mScanning = true
                 bluetoothAdapter?.startLeScan(leScanCallback)
             }
@@ -61,11 +62,10 @@ class BlScanManager constructor(
     private val leScanCallback = BluetoothAdapter.LeScanCallback { device, rssi, scanRecord ->
         //activity.runOnUiThread {
             val iBeacon = IBeacon(scanRecord, rssi)
-            iBeacon.uuid?.let {
-                Logging.d(
-                    "leScanCallback ${it} ${iBeacon.major} ${iBeacon.minor} ${rssi}"
-                )
-            }
+            //if (iBeacon.uuid == "XXXXXXXXXXX") {
+                callback(iBeacon)
+            //}
+            //Logging.d("leScanCallback ${it} ${iBeacon.major} ${iBeacon.minor} ${rssi}")
         //}
     }
 }
