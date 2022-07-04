@@ -25,7 +25,8 @@ class WifiObserver constructor(var context: Context, var activity: AppCompatActi
     fun start() {
 
         Logging.d("")
-        // 位置情報の権限認証を経てから、ビーコンスキャンのアラームを開始する
+
+        // 位置情報の権限認証を経てから、開始する
         val authorizationController = AuthorizationChecker(context, activity)
         authorizationController.start({ result: AuthorizationResult ->
             print("complete!!!")
