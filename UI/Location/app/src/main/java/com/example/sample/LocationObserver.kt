@@ -1,22 +1,17 @@
 package com.example.sample
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
-import android.os.Build
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
 import com.google.android.material.snackbar.Snackbar
 import java.lang.ref.WeakReference
@@ -41,81 +36,15 @@ class LocationObserver constructor(private var context: Context, private var act
 
         Logging.d("")
 
-        checkPermission()
-    }
-
-    //region 許諾
-
-    // 位置情報の権限の確認
-    private fun checkPermission() {
-
-        Logging.d("")
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            startLocation()
-            return
-        }
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED ||
-            ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED) {
-            startLocation()
-            return
-        }
-        checkPermissionRationale()
-    }
-
-    // PermissionRationaleをチェックする
-    private fun checkPermissionRationale() {
-
-        Logging.d("")
-
-        if (ActivityCompat.shouldShowRequestPermissionRationale(
-                activity, Manifest.permission.ACCESS_FINE_LOCATION) ||
-            ActivityCompat.shouldShowRequestPermissionRationale(
-                activity, Manifest.permission.ACCESS_COARSE_LOCATION)) {
-            // 以前許諾を拒否された場合などの再表示が必要なときにコールされ、ここでアプリが権限を必要とする理由を説明する
-            Logging.d("shouldShowRequestPermissionRationale")
-            val msg = "XXXXXXの理由により位置情報を取得します。"
-            showSnackBar(activity, msg) {
-                requestPermissions()
-            }
-        } else {
-            Logging.d("else")
-            requestPermissions()
-        }
-    }
-
-    private val permissionLauncher = activity.registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) ||
-                permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)) {
+        // 位置情報の権限認証を経てから、ビーコンスキャンのアラームを開始する
+        val authorizationController = AuthorizationChecker(context, activity)
+        authorizationController.start({ result: AuthorizationResult ->
+            print("complete!!!")
+            if (result == AuthorizationResult.SUCCESS) {
                 startLocation()
-            } else {
-                Logging.d("not granted, so return")
             }
-        } else {
-            startLocation()
-        }
+        })
     }
-
-    private fun requestPermissions() {
-
-        Logging.d("")
-
-        permissionLauncher.launch(requestArray())
-    }
-
-    private fun requestArray(): Array<String> {
-
-        return arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
-        )
-    }
-
-    //endregion
 
     @SuppressLint("MissingPermission")
     private fun startLocation() {

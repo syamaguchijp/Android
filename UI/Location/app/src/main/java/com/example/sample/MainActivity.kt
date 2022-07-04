@@ -1,14 +1,9 @@
 package com.example.sample
 
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.location.Location
-import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.Settings
 import android.widget.Toast
-import com.example.sample.Logging.Companion.context
 import java.lang.ref.WeakReference
 
 class MainActivity : AppCompatActivity(), LocationObserverCallback {
