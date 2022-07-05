@@ -15,7 +15,8 @@ class MainActivity : AppCompatActivity() {
         scanLan()
     }
 
-    // https://github.com/stealthcopter/AndroidNetworkTools
+    // https://github.com/stealthcopter/AndroidNetworkTools を利用したサンプルです。
+    // （https://github.com/csicar/Ning も良さそうだが。）
     private fun scanLan() {
 
         Logging.d("Scan started")
